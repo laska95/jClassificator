@@ -37,22 +37,20 @@ class JiraProvider {
     
     /*================= Методи для аунтифікації користувача ==================*/
     
-    public function validateTest($username, $password){
-        
-        $jiraUrl = \Yii::$app->params['jiraUrl'];
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $jiraUrl . '/rest/api/2/myself');
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_USERPWD, "{$username}:{$password}");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        
-        $ret = new FullResponse($ch);
-        
-        curl_close($ch);
-                
-        return $ret;
-    }
+//    public function validateTest($username, $password, $jiraUrl){
+//                
+//        $ch = curl_init();
+//        curl_setopt($ch, CURLOPT_URL, $jiraUrl . '/rest/api/2/myself');
+//        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+//        curl_setopt($ch, CURLOPT_USERPWD, "{$username}:{$password}");
+//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+//        
+//        $ret = new FullResponse($ch);
+//        
+//        curl_close($ch);
+//                
+//        return $ret;
+//    }
     
     /** 
      * Намагається авторизуватися в системі Jira використовуючи простий 
@@ -60,10 +58,8 @@ class JiraProvider {
      * 
      * @return bool TRUE - якщо авторизація пройшла успішно
      */
-    public function validatePassword($username, $password){
-        
-        $jiraUrl = \Yii::$app->params['jiraUrl'];
-        
+    public function validatePassword($username, $password, $jiraUrl){
+                
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $jiraUrl . '/rest/auth/1/session');
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -83,7 +79,7 @@ class JiraProvider {
      * 
      * @return FullResponse , де відповідь - ключ сесії у випадку успіху 
      */
-    public function createSession($username, $password){
+    public function createSession($username, $password, $jiraUrl){
          
         /* Приклад коректної відповіді (JSON)
          * "session": {
@@ -97,7 +93,7 @@ class JiraProvider {
             'password' => $password,
         ];
         
-        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'POST', $post_data);
+        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'POST', $post_data, $jiraUrl);
         $ret = new FullResponse($ch);
         curl_close($ch);       
         return $ret;
@@ -150,8 +146,7 @@ class JiraProvider {
     /**
      * @return FullResponse 
      */
-    public function getSelf2($username, $password){
-        $jiraUrl = \Yii::$app->params['jiraUrl'];
+    public function getSelf2($username, $password, $jiraUrl){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $jiraUrl . '/rest/api/2/myself');
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
@@ -164,18 +159,8 @@ class JiraProvider {
         return $ret;
     }
     
-    public function getSelf(){
-//        $ch = $this->getBaseCurl('/rest/auth/1/session');
-//        $ret = new FullResponse($ch);
-//        curl_close($ch);
-//              
-//        return $ret;
-        
-        $post = [
-            'jql' => 'status IN ("To Do") ORDER BY "created"'
-        ];
-        
-        $ch = $this->getBaseCurl('/rest/api/2/search', [], 'POST', $post);
+    public function getSelf(){      
+        $ch = $this->getBaseCurl('/rest/api/2/myself', []);
         $ret = new FullResponse($ch);
         curl_close($ch);
         return $ret;
@@ -194,7 +179,7 @@ class JiraProvider {
             'jql' => $jql,
             'startAt' => $startAt,
             'maxResults' => $maxResults,
-//            'fields' => $fields,
+            'fields' => $fields,
         ];
                 
         $ch = $this->getBaseCurl('/rest/api/2/search', [], 'POST', $post);
@@ -236,10 +221,10 @@ class JiraProvider {
         return "cookie: {$session['name']}={$session['value']}";
     }
         
-    private function getBaseCurl($restUrl, $headers = [], $type = 'GET', $data = NULL, $user = NULL){
-        
-        $jiraUrl = \Yii::$app->params['jiraUrl'];
-        $user = $user ?? \Yii::$app->user->identity;
+    private function getBaseCurl($restUrl, $headers = [], $type = 'GET', $data = NULL, $jiraUrl = NULL){
+               
+        $user = \Yii::$app->user->identity;
+        $jiraUrl = $jiraUrl ?? $user->jiraUrl;
         $session_header = $this->generateSessionHeader($user->jiraAuthKey ?? NULL);
         $headers[] = $session_header;
         

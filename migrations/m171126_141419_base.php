@@ -13,7 +13,7 @@ class m171126_141419_base extends Migration
         $this->createTable('user', [
             'id' => $this->primaryKey(),
             'fullName' => $this->string(200),   //ім'я користувача для відображення
-            'userName' => $this->string(200),   //ім'я, що використовується для реєстрації в Jira
+            'username' => $this->string(200),   //ім'я, що використовується для реєстрації в Jira
             'email' => $this->string(200),
             'authKey' => $this->text(),         //ключ поточної сесії
             'jiraAuthKey' => $this->text(),     //ключ сесії в Jira

@@ -18,6 +18,8 @@ use Codeception\Util\HttpCode;
 /** @property string $email */
 /** @property string $authKey */
 /** @property string $jiraAuthKey */
+/** @property string $jiraUrl */
+/** @property string $apiKey */
 class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
 
@@ -29,7 +31,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
         return [
             [['fullName', 'username'], 'string', 'max' => 200],
             [['email'], 'email'],
-            [['jiraAuthKey', 'api_key', 'jira_url', 'authKey'], 'string'],
+            [['jiraAuthKey', 'apiKey', 'jiraUrl', 'authKey'], 'string'],
             [['username'], 'required'],
             [['username', 'email'], 'unique']
         ];
@@ -80,7 +82,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     }
 
     /**
-     * Валідація паролю виконується в системі Jira
+     * Валідація паролю виконується в Jira
      *
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
@@ -88,7 +90,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     public function validatePassword($password)
     {
         $provider = JiraProvider::getInstance();
-        return $provider->validatePassword($this->email ?? $this->username, $password);
+        return $provider->validatePassword($this->email ?? $this->username, $password, $this->jiraUrl);
     }
     
     public function selfLogin($password){
@@ -99,7 +101,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
             $provider->deleteSession();
         }
         
-        $res = $provider->createSession($this->email ?? $this->username, $password);
+        $res = $provider->createSession($this->email ?? $this->username, $password, $this->jiraUrl);
                 
         $this->authKey = $this->getAuthKey();   //новий ключ сесії
         $this->jiraAuthKey = ($res->code == HttpCode::OK) ? $res->rawResponse : NULL;

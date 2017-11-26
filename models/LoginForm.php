@@ -16,15 +16,15 @@ class LoginForm extends Model
     public $username;
     public $password;
     public $rememberMe = true;
-    public $jira_url;
+    public $jiraUrl;
 
     private $_user = NULL;
     
     public function rules()
     {
         return [
-            [['username', 'password', 'jira_url'], 'required'],
-            [['jira_url'], 'url'],
+            [['username', 'password', 'jiraUrl'], 'required'],
+            [['jiraUrl'], 'url'],
             ['rememberMe', 'boolean'],
             ['password', 'validatePassword'],
         ];
@@ -73,7 +73,7 @@ class LoginForm extends Model
                 } else {
                     $user->username = $this->username;
                 }
-                
+                $user->jiraUrl = $this->jiraUrl;
             }
             
             $this->_user = $user;
@@ -83,9 +83,17 @@ class LoginForm extends Model
     
     public function createNewUser(){
         $provider = \app\modules\jira\providers\JiraProvider::getInstance();
-        $res = $provider->getSelf2($this->username, $this->password);
+        $res = $provider->getSelf2($this->username, $this->password, $this->jiraUrl);
+        
+        
+        
         $data = $res->response;
-
+        
+        if (!$data['name']){
+            var_dump($data);
+            die();
+        }
+        
         $user = User::findByUsername($data['emailAddress']) 
                 ?? User::findByUsername($data['name']) 
                 ?? new User();
@@ -93,7 +101,7 @@ class LoginForm extends Model
         $user->username = $data['name'];
         $user->fullName = $data['displayName'];
         $user->email = $data['emailAddress'];
-        $user->jira_url = $this->jira_url;
+        $user->jiraUrl = $this->jiraUrl;
         $user->save();
         $this->_user = $user;
         return $user;
