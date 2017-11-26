@@ -16,18 +16,13 @@ use \app\modules\jira\models\Issue;
  *
  * @author laska
  */
-class FullApiController extends \app\components\FullApiController{
+class FullApiController extends \yii\web\Controller{
     
-    public function actionGetTest(){
-               
-        $provider = JiraProvider::getInstance();
-        $username = 'laska.g95@ukr.net';
-        $pass = 'Dragon2249';
-        $res = $provider->validateTest($username, $pass);
-        $this->configureResponse($res);
-        return $res->response;
+    public function beforeAction($action) {   
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return parent::beforeAction($action);
     }
-    
+        
     public function actionGetSelf(){     
         $provider = JiraProvider::getInstance();
         $res = $provider->getSelf();

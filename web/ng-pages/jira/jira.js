@@ -36,11 +36,13 @@ issueStatusService, issueService, jQueryLikeSerializeFixed){
     var getProjectList = function (){
         var p = projectService.get();
         p.then(function (data){
-            var arr = [];
+            var arr = [];         
             angular.forEach(data.data, function (data_one){
                  arr.push(data_one);
             });
             self.projectList = arr;
+            self.selectProject = arr[0].key;
+            
         }); 
     };
         
@@ -48,13 +50,15 @@ issueStatusService, issueService, jQueryLikeSerializeFixed){
         var p = issueStatusService.getAll();
         p.then(function (data){
             var arr = [];
+            self.selectedIssueStatusList = [];
             angular.forEach(data.data, function (data_one){
                  arr.push(data_one);
+                 self.selectedIssueStatusList.push(data_one.id);
             });
             self.issueStatusList = arr;
             $timeout(function (){
                 $scope.$apply();
-            })
+            });
         }); 
     };
     
@@ -89,7 +93,7 @@ issueStatusService, issueService, jQueryLikeSerializeFixed){
     
     getProjectList();
     getIssueStatusList();
-    getIssueList();
+//    getIssueList();
         
     var params = {
         'project': 'BRAIN',

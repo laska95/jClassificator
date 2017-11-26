@@ -12,10 +12,8 @@ agile.directive('checkboxList', function () {
         },
         
         controller: function ($scope, $element, $attrs, $location, $timeout) {
-            console.log('checkBoxList');
             
             $scope.toggleVal = function (item){
-                console.log(item[$scope.key]);
                 var i = $scope.ngModel.indexOf(item[$scope.key]);
                 
                 if (i < 0){

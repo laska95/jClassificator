@@ -20,6 +20,16 @@ agile.directive('dropdownSelect', function () {
                 $scope.ngModel = item[$scope.key];
                 $scope.selectItem = item;
             };
+            
+            $scope.$watch(function () {
+                return $scope.ngModel;
+            }, function (new_value){
+                angular.forEach($scope.items, function (one){
+                   if (one.key == $scope.ngModel){
+                       $scope.selectItem = one;
+                   } 
+                });
+            });
         }
         
     } 

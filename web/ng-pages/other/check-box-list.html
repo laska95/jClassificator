@@ -1,11 +1,14 @@
 
-<div class="">
+<div class="dropdown self-dropdown">
     
-    {{ngModel}}
+    <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        select type
+        <span class="caret"></span>
+    </button>
     
-    <ul>
-        <li ng-repeat="item in items"  ng-click="toggleVal(item)">
-            {{ item[title]}} - {{item[key]}}
+    <ul class="dropdown-menu" aria-labelledby="dLabel">
+        <li ng-repeat="item in items"  ng-click="toggleVal(item)"class="dropdown-item">
+            {{ item[title]}} 
             <span class="glyphicon glyphicon-ok" ng-class="{'hide': !isChecked(item)}"></span>
         </li>
     </ul>

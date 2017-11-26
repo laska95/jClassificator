@@ -1,15 +1,14 @@
 <div ng-controller="JiraController as self">
-    <button ng-click="self.testClick()">Click</button>
     
-<!--    <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">
-        
-        
+    <!-- Фільтр по проектах. Можна вибрати тільки один проект -->
+    <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">  
     </dropdown-select>
     
-    <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>-->
+    <!-- Фільтр по статусах (мультиселект) -->
+    <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>
     
-Active = {{self.selectedIssue}}
-
+    <!-- TO DO: фільтр по типу -->
+    
     <div class="row container ">
         <div class="col-md-3 ls-issuel-list">
             <ul class="list-group">
