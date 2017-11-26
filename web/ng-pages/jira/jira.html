@@ -1,30 +1,50 @@
-<div ng-controller="JiraController as self">
+<div ng-controller="JiraController as self" class="row">
     
-    <!-- Фільтр по проектах. Можна вибрати тільки один проект -->
-    <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">  
-    </dropdown-select>
-    
-    <!-- Фільтр по статусах (мультиселект) -->
-    <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>
-    
-    <!-- TO DO: фільтр по типу -->
-    
-    <div class="row container ">
-        <div class="col-md-3 ls-issuel-list">
-            <ul class="list-group">
-                <li ng-repeat="oneIssue in self.issueList">
-                    <issue-as-list issue="oneIssue" 
-                        active="self.activeIssueKey"
-                        selected-arr="self.selectedIssue">                
-                    </issue-as-list>
-                </li>
-            </ul>    
+    <div class="col-md-3">
+        <div>
+            <!-- Список фільтрів -->
+
+            <!-- Фільтр по проектах. Можна вибрати тільки один проект -->
+            <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">  
+            </dropdown-select>
+
+            <!-- Фільтр по статусах (мультиселект) -->
+            <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>
+
+            <!-- TO DO: фільтр по типу -->
+
         </div>
-        
-        <div class="col-md-4 pull-right">
-            <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
+
+        <div class="row container ">
+            <!-- Список задач, що відповідають фільтру -->
+            <div class="col-md-3 ls-issuel-list">
+                <ul class="list-group">
+                    <li ng-repeat="oneIssue in self.issueList">
+                        <issue-as-list issue="oneIssue" 
+                            active="self.activeIssueKey"
+                            selected-arr="self.selectedIssue">                
+                        </issue-as-list>
+                    </li>
+                </ul>    
+            </div>
+
+            <!-- TO DO: пагінація по підгружених задачах -->
+        </div>
+    
+    </div>
+    
+    <div class="col-md-6">
+        <div>
+            <!-- Список фільтрів для кластеризації вибраних задач -->
+        </div>
+        <div>
+            <!-- Результат анілізу задач -->
         </div>
     </div>
     
+    <!-- Детальна інформація по задачі -->
+    <div class="col-md-4 pull-right">
+        <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
+    </div>
     
 </div>

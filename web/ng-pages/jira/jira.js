@@ -76,7 +76,7 @@ issueStatusService, issueService, jQueryLikeSerializeFixed){
         var p = issueService.getByFilter(params);
         p.then(function (response){
             self.issueList = response.data.issues;
-//            console.log(self.issueList);
+            console.log(self.issueList);
             $timeout(function (){
                 $scope.$apply();
             });
@@ -92,13 +92,22 @@ issueStatusService, issueService, jQueryLikeSerializeFixed){
     };
     
     getProjectList();
-    getIssueStatusList();
+    getIssueStatusList();    
 //    getIssueList();
+            
+    $scope.$watch(function (){
+        return JSON.stringify(self.selectedIssueStatusList) + self.selectProject;
+    }, function (new_value){
+        //завантажуємо список задач згідно фільтру
+        if (self.selectProject){
+            var params = {
+                'project': self.selectProject,
+                'status': self.selectedIssueStatusList
+            };
+            getIssueList(params);
+        }
         
-    var params = {
-        'project': 'BRAIN',
-       // 'status': ['To Do', 'Backlog']
-    };
+    });
     
     $scope.$watch(function (){
         return JSON.stringify(self.activeIssueKey);

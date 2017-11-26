@@ -1,12 +1,12 @@
 <div class="content">    
     <div>
         <div class="ls-inline-block"><h5>
+                <!-- Відкриває інформаці по задачі -->
                 <a href="" ng-click="toggleActive()" role="button">{{issue.key}}</a>
             </h5></div>
-        <div class="ls-inline-block pull-right" >
-            {{select}}
+<!--        <div class="ls-inline-block pull-right" >
             <input type="checkbox"  ng-model="select" ng-change="toggleSelect()">
-        </div>
+        </div>-->
     </div>
     <div class="ls-short-content">
         <p>{{issue.fields.summary}}</p>
