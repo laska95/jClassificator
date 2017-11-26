@@ -1,0 +1,33 @@
+
+.ls-inline-block {
+    display: inline-block !important;
+}
+
+.ls-inline {
+    display: inline !important;
+}
+
+.ls-issuel-list{
+    height: 500px; 
+    overflow-y: scroll;
+}
+
+.ls-short-content{
+    max-height: 120px;
+    max-width: 230px;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+
+.ls-issue-desc-conteiner{
+    max-height: 250px;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+
+.ls-d-as-checkbox{
+    height: 20px;
+    width: 20px;
+    background-color: silver;
+    display: inline !important;
+}

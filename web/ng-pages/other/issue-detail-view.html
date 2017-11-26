@@ -1,0 +1,47 @@
+<div class="{{showClass}}">
+    <div>
+        <div class="ls-inline-block">
+            <div class="ls-inline-block"><h4>{{issue.key}}</h4></div>
+            <a href="{{getJiraLink()}}" target="_blank"><span class="glyphicon glyphicon-link"></span></a>
+        </div>
+        <div class="ls-inline-block pull-right"> 
+            <a href ng-click="updateIssue()" role="button"><span class="glyphicon glyphicon-refresh"></span></a>
+            <a href ng-click="toggleClose()" role="button"><span class="glyphicon glyphicon-remove"></span></a>
+        </div>
+    </div>
+    <div>
+        <div>
+            <label>Заголовок:</label>
+            <div>{{cleanText(issue.fields.summary)}}</div>
+        </div>
+        <div>
+            <label class="ls-inline">Тип: </label>
+            <span>{{issue.fields.issuetype.name}}</span>
+        </div>
+        <div>
+            <label class="ls-inline">Статус: </label>
+            <span>{{issue.fields.status.name}}</span>
+        </div>
+        <div>
+            <label class="ls-inline">Пріорітет: </label>
+            <span>{{issue.fields.priority.name}}</span>
+        </div>
+        <div>
+            <label>Опис: </label>
+            <div class="ls-issue-desc-conteiner">
+                <span ng-if="isEmptyStr(issue.fields.description)">
+                    <span class="text-muted">(без опису)</span>
+                </span>
+                <span ng-if="!isEmptyStr(issue.fields.description)">
+                    {{cleanText(issue.fields.description)}}
+                </span>
+                
+            </div>
+        </div>
+    </div>
+    <div class="pull-right text-muted"><small>
+        <span>{{toLocalTime(issue.fields.created) | date:'dd.MM.yyyy HH:mm:ss'}}</span> / 
+        <span>{{toLocalTime(issue.fields.updated) | date:'dd.MM.yyyy HH:mm:ss'}}</span>
+    </small></div>
+    
+</div>

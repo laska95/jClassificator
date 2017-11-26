@@ -1,0 +1,31 @@
+<div ng-controller="JiraController as self">
+    <button ng-click="self.testClick()">Click</button>
+    
+<!--    <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">
+        
+        
+    </dropdown-select>
+    
+    <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>-->
+    
+Active = {{self.selectedIssue}}
+
+    <div class="row container ">
+        <div class="col-md-3 ls-issuel-list">
+            <ul class="list-group">
+                <li ng-repeat="oneIssue in self.issueList">
+                    <issue-as-list issue="oneIssue" 
+                        active="self.activeIssueKey"
+                        selected-arr="self.selectedIssue">                
+                    </issue-as-list>
+                </li>
+            </ul>    
+        </div>
+        
+        <div class="col-md-4 pull-right">
+            <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
+        </div>
+    </div>
+    
+    
+</div>

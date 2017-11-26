@@ -1,0 +1,80 @@
+<div class="content" ng-controller="DecisionApiIssueQualityCtrl as self">
+    <h2>Аналіз якості опису задачі</h2>
+    <p>
+        Алгоритм перевіряє, чи опис задачі написаний на зрозумілій для людини мові.
+        Для цього частотну характеристику тексту порівнюється із частотною характеристикою мови.
+        Для порівняння можна вибрати одну з відомих мов в системі (українська, російська чи англійська),
+        або частону характеристику мови, що для опису задач проекту. Остання генерується із опису уже виконаних задач.
+    </p>
+    
+    <div class="container">
+        
+        <h4><span>(POST)</span></h4>
+        <p>URL: <span>http://agile.loc/decision/full-api/text-quality</span></p>
+        
+        <p>Ключі задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="issue_key in self.post_params.issue_key_arr">
+                <div class="form-group">
+                    <input class="form-control" ng-model="issue_key">
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <p>Масив описаних задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+                <div class="form-group">
+                    <p>Задача {{key}}:</p>
+                    <textarea class="form-control" ng-model="issue.description"></textarea>
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <div  class=" row form-group">
+            <ul class="list-inline">
+                <li><label class="radio-inline"><input type="radio" name="lang" value="ua-UA" ng-model="self.post_params.lang_code">Українська</label></li>
+                <li><label class="radio-inline"><input type="radio" name="lang" value="ru-RU" ng-model="self.post_params.lang_code">Російська</label></li>
+                <li><label class="radio-inline"><input type="radio" name="lang" value="en-En" ng-model="self.post_params.lang_code">Англійська</label></li>
+                <li>
+                    <label class="radio-inline"><input type="radio" name="lang" value="project" ng-model="self.post_params.lang_code">Мова проекту:
+                        <input type="text" ng-model="self.post_params.project_code">
+                    </label>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
+        </div>
+        
+        <div>
+            <div class="form-group">
+                <p>Параметри запиту:</p>
+                <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.post_response_json"></textarea>
+        </div>
+        
+    </div>
+    
+    
+</div>

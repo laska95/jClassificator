@@ -1,0 +1,15 @@
+
+<div class="">
+    
+    {{ngModel}}
+    
+    <ul>
+        <li ng-repeat="item in items"  ng-click="toggleVal(item)">
+            {{ item[title]}} - {{item[key]}}
+            <span class="glyphicon glyphicon-ok" ng-class="{'hide': !isChecked(item)}"></span>
+        </li>
+    </ul>
+
+</div>
+
+    

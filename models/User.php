@@ -2,103 +2,118 @@
 
 namespace app\models;
 
-class User extends \yii\base\Object implements \yii\web\IdentityInterface
+/*
+ * Модель, що використовується для аунтифікації користувача в системі 
+ * та на зовнішніх ресурсах
+ */
+
+use yii\db\ActiveRecord;
+use app\modules\jira\providers\JiraProvider;
+use Codeception\Util\HttpCode;
+
+
+/** @property integer $id */
+/** @property string $fullName */
+/** @property string $username */
+/** @property string $email */
+/** @property string $authKey */
+/** @property string $jiraAuthKey */
+class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
-
-
-    /**
-     * @inheritdoc
-     */
-    public static function findIdentity($id)
-    {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+    public static function tableName() {
+        return 'user';
     }
 
-    /**
-     * @inheritdoc
-     */
+    public function rules() {
+        return [
+            [['fullName', 'username'], 'string', 'max' => 200],
+            [['email'], 'email'],
+            [['jiraAuthKey', 'api_key', 'jira_url', 'authKey'], 'string'],
+            [['username'], 'required'],
+            [['username', 'email'], 'unique']
+        ];
+    }
+
+    /*========================= IdentityInterface ============================*/
+    
+    public static function findIdentity($id)
+    {
+        return  self::findOne(['id' => $id]) ?? null;
+    }
+
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
         return null;
     }
 
     /**
-     * Finds user by username
+     * Шукає користувача за унікальним іменем (логіном) в БД
      *
-     * @param string $username
+     * @param string $username (login)
      * @return static|null
      */
     public static function findByUsername($username)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        $ret = filter_var($username, FILTER_VALIDATE_EMAIL)
+                ? self::findOne(['email' => $username])
+                : self::findOne(['username' => $username]);
+        return  $ret ?? null;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getId()
     {
         return $this->id;
     }
 
     /**
-     * @inheritdoc
+     * Повертає ключ сесії. Якщо в БД такого нема, то генерує новий
      */
     public function getAuthKey()
-    {
-        return $this->authKey;
+    {       
+        return $this->authKey ?? md5($this->id . $this->username . time());
     }
 
-    /**
-     * @inheritdoc
-     */
     public function validateAuthKey($authKey)
     {
         return $this->authKey === $authKey;
     }
 
     /**
-     * Validates password
+     * Валідація паролю виконується в системі Jira
      *
      * @param string $password password to validate
      * @return bool if password provided is valid for current user
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        $provider = JiraProvider::getInstance();
+        return $provider->validatePassword($this->email ?? $this->username, $password);
+    }
+    
+    public function selfLogin($password){
+        $provider = JiraProvider::getInstance();
+        
+        if ($this->jiraAuthKey){
+            //видаляємо застарілу сесію
+            $provider->deleteSession();
+        }
+        
+        $res = $provider->createSession($this->email ?? $this->username, $password);
+                
+        $this->authKey = $this->getAuthKey();   //новий ключ сесії
+        $this->jiraAuthKey = ($res->code == HttpCode::OK) ? $res->rawResponse : NULL;
+                
+        $this->save();
+    }
+
+    public function selfLogout(){
+        $provider = JiraProvider::getInstance();
+        
+        $provider->deleteSession();
+        
+        $this->authKey = NULL;
+        $this->jiraAuthKey = NULL;
+        $this->save();
     }
 }

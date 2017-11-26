@@ -1,0 +1,72 @@
+<div class="content" ng-controller="DecisionApiIssueQualityCtrl as self">
+    <h2>Перевірка задачі на наявність коректного опису</h2>
+    <p>
+        Алгоритм перевіряє, чи опис задачі є достатньо повним та чи він написаний на зрозумілій для людини мові.
+        Результатом виконання алгоритму є віднесення задачі до обного з чотирьох класів:
+    </p>
+
+    <ol>
+        <li>Задача без опису: задачі, де довжина опису з виключенням всіх посилань менша за заголовок задачі</li>
+        <li>Опис задачі не коректний: опис задачі дублює заголовок, або не проходить перевірку на якість</li>
+        <li>Опис задачі містить тільки посилання</li>
+        <li>Задача коректно описана</li>
+    </ol>
+    
+    <div class="container">
+        
+        <h4><span>(POST)</span></h4>
+        <p>URL: <span>http://agile.loc/decision/full-api/availability-description</span></p>
+        
+        <p>Ключі задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="issue_key in self.post_params.issue_key_arr">
+                <div class="form-group">
+                    <input class="form-control" ng-model="issue_key">
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <p>Масив описаних задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+                <div class="form-group">
+                    <p>Задача {{key}}:</p>
+                    <textarea class="form-control" ng-model="issue.description"></textarea>
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+                
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
+        </div>
+        
+        <div>
+            <div class="form-group">
+                <p>Параметри запиту:</p>
+                <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.post_response_json"></textarea>
+        </div>
+        
+    </div>
+    
+    
+</div>

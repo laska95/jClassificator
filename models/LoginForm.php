@@ -16,66 +16,86 @@ class LoginForm extends Model
     public $username;
     public $password;
     public $rememberMe = true;
+    public $jira_url;
 
-    private $_user = false;
-
-
-    /**
-     * @return array the validation rules.
-     */
+    private $_user = NULL;
+    
     public function rules()
     {
         return [
-            // username and password are both required
-            [['username', 'password'], 'required'],
-            // rememberMe must be a boolean value
+            [['username', 'password', 'jira_url'], 'required'],
+            [['jira_url'], 'url'],
             ['rememberMe', 'boolean'],
-            // password is validated by validatePassword()
             ['password', 'validatePassword'],
         ];
     }
 
-    /**
-     * Validates the password.
-     * This method serves as the inline validation for password.
-     *
-     * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
-     */
     public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
-            $user = $this->getUser();
 
+            $user = $this->getUser();
+            
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
         }
     }
 
-    /**
-     * Logs in a user using the provided username and password.
-     * @return bool whether the user is logged in successfully
-     */
     public function login()
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600*24*30 : 0);
+            
+            $user = $this->getUser();
+            
+            if ($user->isNewRecord){
+                $this->createNewUser();
+            }
+            
+            //генерує нові ключі доступу
+            $user->selfLogin($this->password);          
+            return Yii::$app->user->login($user, $this->rememberMe ? 3600*24*30 : 0);
         }
         return false;
     }
 
-    /**
-     * Finds user by [[username]]
-     *
-     * @return User|null
-     */
+
     public function getUser()
     {
-        if ($this->_user === false) {
-            $this->_user = User::findByUsername($this->username);
-        }
+        if ($this->_user === NULL){
 
+            $user = User::findByUsername($this->username);
+
+            if (!$user){
+                $user = new User();
+                if (filter_var($this->username, FILTER_VALIDATE_EMAIL)){
+                    $user->email = $this->username;
+                } else {
+                    $user->username = $this->username;
+                }
+                
+            }
+            
+            $this->_user = $user;
+        }
         return $this->_user;
+    }
+    
+    public function createNewUser(){
+        $provider = \app\modules\jira\providers\JiraProvider::getInstance();
+        $res = $provider->getSelf2($this->username, $this->password);
+        $data = $res->response;
+
+        $user = User::findByUsername($data['emailAddress']) 
+                ?? User::findByUsername($data['name']) 
+                ?? new User();
+        
+        $user->username = $data['name'];
+        $user->fullName = $data['displayName'];
+        $user->email = $data['emailAddress'];
+        $user->jira_url = $this->jira_url;
+        $user->save();
+        $this->_user = $user;
+        return $user;
     }
 }

@@ -1,0 +1,22 @@
+<div class="dropdown self-dropdown">
+        
+    <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span ng-if="ngModel == undefined">
+            {{ "Select"}}
+        </span>
+        <span ng-if="ngModel != undefined">
+            {{ selectItem[title]}}
+        </span>
+        <span class="caret"></span>
+    </button>
+    
+    <ul class="dropdown-menu" aria-labelledby="dLabel">
+        <li ng-repeat="item in items" class="dropdown-item"  ng-click="toggleVal(item)">
+            {{ item[title]}}
+            <span class="glyphicon glyphicon-ok" ng-class="{'hide': (item[key] != ngModel)}"></span>
+        </li>
+    </ul>
+
+</div>
+
+    

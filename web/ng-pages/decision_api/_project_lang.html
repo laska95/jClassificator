@@ -1,0 +1,126 @@
+<div class="content" ng-controller="DecisionApiProjactLangCtrl as self">
+    <h2>Визначення параметрів мови проекту</h2>
+    <p>
+        Для аналізу задач використовуються статестичні параметри мови проект.
+        Вони формуються на основі опису виконаних задач. 
+        Якщо в системі нема інформації про мови проекту, то перевірки пов'язані з нею не виконуються,
+        або порівняння відбувається на основі інформації про зарезервовані мови (української, російської, англійської).
+        Під параметрами мови розуміється її частотна характеристика. 
+        В БД зберігаються частотні характеристики окремих букв та найпопулярніших комбінацій з 5 та 7 символів.
+    </p>
+    
+    <div class="container">
+        
+        <h4><span>(GET)</span> Перегляд параметрів мови проекту</h4>
+        <p>Метод повертає таблицю частоної характеристики мови вказаного проекту</p>
+        <p>URL: http://agile.loc/decision/full-api/text-quality?project-key={{self.get_project_key}}</p>
+        
+        <div class="form-group">
+            <p>Код проекту:</p>
+            <input class="form-control" ng-model="self.get_project_key">
+        </div>
+        
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.get_subbmit()">Відправити запит</button>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.get_response_json"></textarea>
+        </div>
+        
+        <div><hr></div>
+    </div>
+    
+    <div class="container">
+        <h4><span>(POST)</span> Визначення параметрів мови проекту</h4>
+        
+        <p>
+            Параметрами запиту є довільна кількість описаних задач. 
+            Якщо в запиті вказаний ключ сесії Jira, достатньо передати масив ключів задач, 
+            інакше задачі повинні передаватися у вигляді масиву з описом.
+            Нова частотна характеристика сумується із вже існуючою.
+            Результатом є перерахована частотна характеристика мови проекту.
+        </p>
+        
+        <p>URL: http://agile.loc/decision/full-api/text-quality?project-key={{self.post_project_key}}</p>
+        
+        <div class="form-group">
+            <p>Код проекту:</p>
+            <input class="form-control" ng-model="self.post_project_key">
+        </div>
+        
+        <p>Ключі задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="issue_key in self.post_params.issue_key_arr">
+                <div class="form-group">
+                    <input class="form-control" ng-model="issue_key">
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <p>Масив описаних задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+                <div class="form-group">
+                    <p>Задача {{key}}:</p>
+                    <textarea class="form-control" ng-model="issue.description"></textarea>
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
+        </div>
+        
+        <div>
+            <div class="form-group">
+                <p>Параметри запиту:</p>
+                <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.post_response_json"></textarea>
+        </div>
+        
+        <div><hr></div>
+    </div>
+
+    <div class="container">
+        <h4><span>(DELETE)</span> Видалення існуючих параметрів мови проекту</h4>
+        <p>
+            Метод видаляє частотну характеристику мови вказаного проекту
+        </p>
+
+        <p>URL: http://agile.loc/decision/full-api/text-quality?project-key={{self.post_project_key}}</p>
+        
+        <div class="form-group">
+            <p>Код проекту:</p>
+            <input class="form-control" ng-model="self.delete_project_key">
+        </div>
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.a1_delete()">Відправити запит</button>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.delete_response_json"></textarea>
+        </div>
+    </div>
+</div>
