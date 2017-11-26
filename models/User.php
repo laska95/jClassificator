@@ -98,10 +98,10 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
         
         if ($this->jiraAuthKey){
             //видаляємо застарілу сесію
-            $provider->deleteSession();
+            $provider->deleteSession($this);
         }
         
-        $res = $provider->createSession($this->email ?? $this->username, $password, $this->jiraUrl);
+        $res = $provider->createSession($this->email ?? $this->username, $password, $this);
                 
         $this->authKey = $this->getAuthKey();   //новий ключ сесії
         $this->jiraAuthKey = ($res->code == HttpCode::OK) ? $res->rawResponse : NULL;
@@ -112,7 +112,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
     public function selfLogout(){
         $provider = JiraProvider::getInstance();
         
-        $provider->deleteSession();
+        $provider->deleteSession($this);
         
         $this->authKey = NULL;
         $this->jiraAuthKey = NULL;

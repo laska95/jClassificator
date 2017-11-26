@@ -79,7 +79,7 @@ class JiraProvider {
      * 
      * @return FullResponse , де відповідь - ключ сесії у випадку успіху 
      */
-    public function createSession($username, $password, $jiraUrl){
+    public function createSession($username, $password, $user){
          
         /* Приклад коректної відповіді (JSON)
          * "session": {
@@ -93,7 +93,7 @@ class JiraProvider {
             'password' => $password,
         ];
         
-        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'POST', $post_data, $jiraUrl);
+        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'POST', $post_data, $user);
         $ret = new FullResponse($ch);
         curl_close($ch);       
         return $ret;
@@ -116,8 +116,8 @@ class JiraProvider {
      * 
      * @return FullResponse
      */
-    public function deleteSession(){  
-        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'DELETE');
+    public function deleteSession($user){  
+        $ch = $this->getBaseCurl('/rest/auth/1/session', [], 'DELETE', [], $user);
         $ret = new FullResponse($ch);
         curl_close($ch);
         return $ret;
@@ -221,14 +221,13 @@ class JiraProvider {
         return "cookie: {$session['name']}={$session['value']}";
     }
         
-    private function getBaseCurl($restUrl, $headers = [], $type = 'GET', $data = NULL, $jiraUrl = NULL){
+    private function getBaseCurl($restUrl, $headers = [], $type = 'GET', $data = NULL, $user = NULL){
                
-        $user = \Yii::$app->user->identity;
-        $jiraUrl = $jiraUrl ?? $user->jiraUrl;
+        $user = $user ?? \Yii::$app->user->identity;
         $session_header = $this->generateSessionHeader($user->jiraAuthKey ?? NULL);
         $headers[] = $session_header;
         
-        $url = $jiraUrl . $restUrl;
+        $url = $user->jiraUrl . $restUrl;
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
