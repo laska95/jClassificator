@@ -47,6 +47,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'decision/full-api/project-lang' => 'decision/full-api/project-lang',
                 'jira' => 'jira/default/index/',
                 'decision-api' => 'decision/default/index/',
                 '<controller:\w+>' => '<controller>/index',

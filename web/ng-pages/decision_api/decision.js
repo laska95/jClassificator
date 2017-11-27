@@ -3,12 +3,27 @@
 function DecisionApiProjactLangCtrl($scope, $route, $http, $timeout){
     var self = this;
     
+    self.url = '/decision/full-api/project-lang';
     self.get_project_key = '';
     self.get_response = {};
     self.get_response_json = '';
     
     self.get_subbmit = function (){
         
+        $.ajax({
+            type: 'GET',
+            url: self.url,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Agile-Api-Key-Header", $scope.api_key);
+              },
+            data: {'project_key': self.get_project_key},
+            dataType: 'json'
+        }).done(function(data) { 
+           self.get_response_json = angular.toJson(data, true);
+           $timeout(function (){
+              $scope.$apply(); 
+           });
+        });        
     };
     
     self.post_project_key = '';
@@ -292,7 +307,6 @@ function DecisionApiController($scope, $route, $http, $timeout){
 }
 
 angular.module('app.decisionApi', ['ngRoute'])
-        .controller('DecisionApiController', DecisionApiController)
         .controller('DecisionApiProjactLangCtrl', DecisionApiProjactLangCtrl)
         .controller('DecisionApiIssueQualityCtrl', DecisionApiIssueQualityCtrl)
         .controller('DecisionApiAvailabilityDescriptionCtrl', DecisionApiAvailabilityDescriptionCtrl)
@@ -302,9 +316,9 @@ angular.module('app.decisionApi', ['ngRoute'])
         .controller('DecisionApiSearchSimilarCtrl', DecisionApiSearchSimilarCtrl)
         .run(function ($rootScope, $location, $anchorScroll, $routeParams){
             $rootScope.$on('$routeChangeSuccess', function(newRoute, oldRoute) {
-    $location.hash($routeParams.scrollTo);
-    $anchorScroll();  
-  });
+                $location.hash($routeParams.scrollTo);
+                $anchorScroll();  
+              });
 });
 
 
