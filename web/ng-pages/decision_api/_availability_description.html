@@ -1,4 +1,4 @@
-<div class="content" ng-controller="DecisionApiIssueQualityCtrl as self">
+<div class="content" ng-controller="DecisionApiAvailabilityDescriptionCtrl as self">
     <h2>Перевірка задачі на наявність коректного опису</h2>
     <p>
         Алгоритм перевіряє, чи опис задачі є достатньо повним та чи він написаний на зрозумілій для людини мові.
@@ -15,7 +15,7 @@
     <div class="container">
         
         <h4><span>(POST)</span></h4>
-        <p>URL: <span>http://agile.loc/decision/full-api/availability-description</span></p>
+        <p>URL: {{self.url}}</p>
         
         <p>Ключі задач:</p>
         <div class="row">
@@ -37,8 +37,13 @@
         <div class="row">
 
             <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+                <p>Задача {{key}}:</p>
                 <div class="form-group">
-                    <p>Задача {{key}}:</p>
+                    <p>Заголовок:</p>
+                    <input class="form-control" ng-model="issue.summary"></textarea>
+                </div>                
+                <div class="form-group">
+                    <p>Опис:</p>
                     <textarea class="form-control" ng-model="issue.description"></textarea>
                 </div>
             </div>

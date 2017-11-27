@@ -56,6 +56,12 @@ trait FrequencyTrait {
             }
         }
         
+        //нормалізація
+        $max = array_sum($fr_new);
+        foreach ($fr_new as $c => $f){
+            $fr_new[$c] = $f * 100 / $max;
+        }
+        
         return $fr_new;
     }
 

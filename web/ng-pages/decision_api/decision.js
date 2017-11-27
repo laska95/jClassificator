@@ -125,20 +125,36 @@ function DecisionApiAvailabilityDescriptionCtrl($scope, $route, $http, $timeout)
     self.post_response = {};
     self.post_response_json = '';
     
+    self.url = '/decision/full-api/availability-description';
+    
     self.post_subbmit = function (){
-        
+        $.ajax({
+            type: 'POST',
+            url: self.url,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Agile-Api-Key-Header", $scope.api_key);
+            },
+            data: self.post_params,
+            dataType: 'json'
+        }).done(function(data) { 
+           self.post_response_json = angular.toJson(data, true);
+           $timeout(function (){
+              $scope.$apply(); 
+           });
+        });  
     };
     
     self.post_params = {
         issue_arr: {
             1: {
                 description: 'Ознайомитися з API',
+                summary: 'Задача 1'
             },
             2: {
                 description: '',
             }
         },
-        issue_key_arr: ['PR-8', ''],
+        issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
         lang_code: 'ua-UA',
         project_code: ''
     };

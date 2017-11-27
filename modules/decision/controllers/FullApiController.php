@@ -74,8 +74,6 @@ class FullApiController extends \yii\web\Controller{
         }
     }
 
-    
-
     public function actionTextQuality(){      
         
         if (\Yii::$app->request->isPost){
@@ -98,4 +96,38 @@ class FullApiController extends \yii\web\Controller{
         
     }
     
+    public function actionAvailabilityDescription(){
+        if (\Yii::$app->request->isPost){
+            $post = \Yii::$app->request->post();
+            
+            $lang = $post['lang_code'];
+            $prj = $post['project_code'];
+                        
+            $issues = [];
+            foreach ($post['issue_arr'] as $key => $one){
+               $one['key'] = $key;
+               $issues[$key] = $one;
+            }                   
+            
+            $provider = JiraProvider::getInstance();
+            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+            $jiraIssues = $provider->getIssueList($jql, ['description', 'summary']);
+            if (isset($jiraIssues->getResponse()['issues'])){
+                foreach ($jiraIssues->getResponse()['issues'] as $one){
+                    $issues[$one['key']] =  [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description']
+                        ];
+                }
+            }
+            
+            $ret = [];
+            foreach ($issues as $key => $one){
+                $ret[$key] = \app\modules\decision\helpers\Decision::availabilityDescription($one, $this->_user);
+            }
+
+            return $ret;
+        }
+    }
 }

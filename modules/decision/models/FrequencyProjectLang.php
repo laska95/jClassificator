@@ -38,7 +38,7 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
 
     public static function createNew($text, $project_id) {
   
-        foreach ([1, 5] as $n){
+        foreach ([1] as $n){
             $fr = self::canculateFrequency($text, $n);
               
             if ($n > 3){

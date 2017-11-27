@@ -7,6 +7,21 @@ use \app\modules\decision\models\FrequencyProjectLang;
 
 class Decision {
     
+    /*availabilityDescription*/
+    const AD_GOOD = 1;
+    const AD_EMPTY = 2;
+    const AD_BAD = 3;
+    const AD_ONLY_URL = 4;
+
+    public static function getAD_Labels(){
+        return[
+            self::AD_GOOD => 'Задача містить коректний опис',
+            self::AD_EMPTY => 'Задача не описана',
+            self::AD_BAD => 'Задача описана не коректно',
+            self::AD_ONLY_URL => 'Опис містить тільки url посилання'
+        ];
+    }
+
     public static function textQuality($text, $lang, $project = NULL, $user){
         
         //таблиця із словником
@@ -18,7 +33,11 @@ class Decision {
             $f_text = FrequencyLang::canculateFrequency($text, 1);
             $f_abc = FrequencyLang::getFrequencyLangN($lang, 1);
         }              
-                
+            
+        if (!$f_abc){
+            return FALSE;
+        }
+        
         $d0 = self::qDif($f_abc, []);
         $d1 = self::qDif($f_text, $f_abc);
         $d1_norm = 100 - self::normDef($d0, $d1);
@@ -49,7 +68,67 @@ class Decision {
         
     }
     
-    
+    public static function availabilityDescription($issue, $user){
+//        var_dump($issue);
+        preg_match('/(^[[:upper:]]+\-)/U', $issue['key'], $project_key);
+        if (isset($project_key[0]) && is_string($project_key[0])){
+            $project_key = substr($project_key[0], 0, -1);
+        }
+        
+        $urls = [];
+        $url_count = preg_match_all('/(https?:\/\/[\w\.-]+)\/?/', $issue['description'], $urls);
+        $clean_url_desc = preg_replace('/(https?:\/\/[\w\.-]+)\/?/', '', $issue['description']);
+        $clean_noabc_desc = preg_replace('/[\W_]/u', '', $clean_url_desc);
+        
+        if (!$clean_noabc_desc && $url_count == 0){
+            return [
+                'value' => self::AD_EMPTY,
+                'text' => self::getAD_Labels()[self::AD_EMPTY] 
+            ];
+        }
+        
+        $clean_summary = preg_replace('/[\W_]/u', '', $issue['summary']);
+        if ($url_count > 0 && strlen($clean_noabc_desc) < strlen($clean_summary) ){
+            return [
+                'value' => self::AD_ONLY_URL,
+                'text' => self::getAD_Labels()[self::AD_ONLY_URL] ,
+                'url' => $urls
+            ];
+        }
+        
+        //чи заголовок не дублює опис?        
+        $f_summary = FrequencyProjectLang::canculateFrequency($clean_summary, 1);
+        $f_description = FrequencyProjectLang::canculateFrequency($issue['description'], 1);
+        
+        $d0 = self::qDif($f_description, []);
+        $d1 = self::qDif($f_description, $f_summary);
+        $d1_norm = 100 - self::normDef($d0, $d1);
+        $quality = ($d1_norm < 50) ? TRUE : FALSE;
+        
+        //чи опис нормально написаний?
+        $quality2 = self::textQuality($clean_url_desc, 'project', $project_key, $user);
+        if ($quality2 !== FALSE){
+            $quality*= ($quality2['value'] > 32) ? TRUE : FALSE;
+        } 
+        
+        if ($quality){
+            return [
+                'value' => self::AD_GOOD,
+                'text' => self::getAD_Labels()[self::AD_GOOD] ,
+                'quality_summary' => $d1_norm ?? NULL,
+                'quality_description' => $quality2 ?? NULL,
+            ];
+        } else {
+            return [
+                'value' => self::AD_BAD,
+                'text' => self::getAD_Labels()[self::AD_BAD] ,
+                'quality_summary' => $d1_norm ?? NULL,
+                'quality_description' => $quality2 ?? NULL,
+            ];
+        }
+        
+    }
+
     private static function qDif($v1, $v2){
         $s2 = 0; //сума різниці квадратів
         
