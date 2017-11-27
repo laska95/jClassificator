@@ -12,10 +12,10 @@
         <li><a href="/decision-api#a0" target="_self">Визначення параметрів мови проекту</a></li>
         <li><a href="/decision-api#a1" target="_self">Аналіз якості опису задачі</a></li>
         <li><a href="/decision-api#a2" target="_self">Перевірка задачі на наявність коректного опису</a></li>
-        <li><a href="/decision-api#a3" target="_self">Переріхунок пріоритуту задач</a></li>
-        <li><a href="/decision-api#a4" target="_self">Пошук задіч із посиланнями на спільні ресурси</a></li>
-        <li><a href="/decision-api#a5" target="_self">Кластеризація задач за описом </a></li>
-        <li><a href="/decision-api#a6" target="_self">Пошук подібної до вказаної задачі за описом </a></li>
+        <li><a href="/decision-api#a3" target="_self">Класифікація за пріоритетом</a></li>
+        <li><a href="/decision-api#a4" target="_self">Кластеризація за спільними ресурсами</a></li>
+        <li><a href="/decision-api#a5" target="_self">Кластеризація за описом </a></li>
+        <li><a href="/decision-api#a6" target="_self">Пошук подібних задач до даної </a></li>
     </ul>
     
     <div class="form-group">
@@ -23,11 +23,14 @@
         <input type='text' ng-model="api_key" class="form-control">
     </div>
         
-    <!--<a name="a0"></a>-->
-<!--    <div ng-include src="'/ng-pages/decision_api/_project_lang.html'"></ng-include>
+<!--    <a name="a0"></a>
+    <div ng-include src="'/ng-pages/decision_api/_project_lang.html'"></ng-include>
 
--->    <a id="a1"></a>
+    <a id="a1"></a>
     <div ng-include src="'ng-pages/decision_api/_issue_quality.html'"></div>
     
     <a id="a2"></a>
-    <div ng-include src="'ng-pages/decision_api/_availability_description.html'"></div>
+    <div ng-include src="'ng-pages/decision_api/_availability_description.html'"></div>-->
+    
+    <a id="a3"></a>
+    <div ng-include src="'ng-pages/decision_api/_priority_clustering.html'"></div>

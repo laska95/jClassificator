@@ -70,6 +70,13 @@ class FullApiController extends \yii\web\Controller{
 //        return $res->response;
     }
 
+    public function actionGetIssuePriority(){
+        $provider = JiraProvider::getInstance();
+        $res = $provider->getIssuePriority();
+        $this->configureResponse($res);
+        return $res->response;
+    }
+
     /**
      * Налаштовує відповідь від сервера, залежно від відповіді Jira 
      */

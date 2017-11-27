@@ -1,0 +1,76 @@
+<div class="content" ng-controller="DecisionApiPriorityClusteringCtrl as self">
+    <h2>Класифікація за пріоритетом</h2>
+    <p>
+        Метод перераховує пріоритет задач. Задачі класифікуються за значенням поля пріорітету, але,
+        якщо ({значення_поточної_дати} + {оцінка_виконання_в_годинах} >= {кінцева_дата_виконання}), 
+        пріоритет задачі є найвищим
+    </p>
+    
+    <div class="container">
+        
+        <h4><span>(POST)</span></h4>
+        <p>URL: {{self.url}}</p>
+        
+        <p>Ключі задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="issue_key in self.post_params.issue_key_arr">
+                <div class="form-group">
+                    <input class="form-control" ng-model="issue_key">
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+        
+        <p>Масив задач:</p>
+        <div class="row">
+
+            <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+                <p>Задача {{key}}:</p>
+                <div class="form-group">
+                    <p>Ключ:</p>
+                    <input class="form-control" ng-model="issue.key">
+                </div>
+                <div class="form-group">
+                    <p>Пріоритет:</p>
+                    <dropdown-select ng-model="issue.priority_id" key="id" title="name" items="self.priorityList">  
+                    </dropdown-select>
+                </div>                
+                <div class="form-group">
+                    <p>Дата здачі: {{issue.due_date}}</p>
+                    <input calendar ng-model="issue.due_date">
+                </div>
+            </div>
+
+
+            <div class="col-sm-4">
+                <button>Додати задачу</button>
+            </div>
+
+        </div>
+                
+        <div class="row container">
+            <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
+        </div>
+        
+        <div>
+            <div class="form-group">
+                <p>Параметри запиту:</p>
+                <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <p>Результат:</p>  
+            <textarea class="form-control" ng-model="self.post_response_json"></textarea>
+        </div>
+        
+    </div>
+    
+    
+</div>

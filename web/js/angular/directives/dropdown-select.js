@@ -22,11 +22,14 @@ agile.directive('dropdownSelect', function () {
             };
             
             $scope.$watch(function () {
-                return $scope.ngModel;
+                return JSON.stringify($scope.ngModel) + JSON.stringify($scope.items);
             }, function (new_value){
                 angular.forEach($scope.items, function (one){
-                   if (one.key == $scope.ngModel){
+                   if (one[$scope.key] + '' == $scope.ngModel + ''){
                        $scope.selectItem = one;
+                       $timeout(function (){
+                          $scope.$apply(); 
+                       });
                    } 
                 });
             });

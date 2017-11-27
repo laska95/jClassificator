@@ -36,22 +36,7 @@ class JiraProvider {
     }
     
     /*================= Методи для аунтифікації користувача ==================*/
-    
-//    public function validateTest($username, $password, $jiraUrl){
-//                
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_URL, $jiraUrl . '/rest/api/2/myself');
-//        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-//        curl_setopt($ch, CURLOPT_USERPWD, "{$username}:{$password}");
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-//        
-//        $ret = new FullResponse($ch);
-//        
-//        curl_close($ch);
-//                
-//        return $ret;
-//    }
-    
+        
     /** 
      * Намагається авторизуватися в системі Jira використовуючи простий 
      * метод аунтифікації. Це єдиний метод, що не повертає FullResponse
@@ -202,6 +187,13 @@ class JiraProvider {
         return $ret;
     }
     
+    public function getIssuePriority(){
+        $ch = $this->getBaseCurl('/rest/api/2/priority', [], 'GET');
+        $ret = new FullResponse($ch);
+        curl_close($ch);
+        return $ret;
+    }
+
     protected function generateSessionHeader($session){
         /* Приклад вхіних даних (JSON):
          * $session = {

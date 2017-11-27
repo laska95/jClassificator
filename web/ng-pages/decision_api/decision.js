@@ -168,8 +168,26 @@ function DecisionApiAvailabilityDescriptionCtrl($scope, $route, $http, $timeout)
     });
 }
 
-function DecisionApiRecountingPriorityCtrl($scope, $route, $http, $timeout){
+function DecisionApiPriorityClusteringCtrl($scope, $route, $http, $timeout, JiraIssuePriority){
     var self = this;
+
+    self.priorityList = [];
+
+    var getIssuePriorityList = function (){
+        var p = JiraIssuePriority.get();
+        p.then(function (data){
+            var arr = [];         
+            angular.forEach(data.data, function (data_one){
+                 arr.push(data_one);
+            });
+            self.priorityList = arr;    
+            $timeout(function (){
+                $scope.$apply();
+            });
+        }); 
+    };
+
+    getIssuePriorityList();
 
     self.post_response = {};
     self.post_response_json = '';
@@ -181,15 +199,19 @@ function DecisionApiRecountingPriorityCtrl($scope, $route, $http, $timeout){
     self.post_params = {
         issue_arr: {
             1: {
-                description: 'Ознайомитися з API',
+                key: 'PR-1',
+                priority_id: '2',
+                due_date: '2017-11-27T18:20:12',
+                remainingEstimateSeconds: 600,
             },
             2: {
-                description: '',
+                key: 'PR-2',
+                priority_id: '3',
+                due_date: '2017-10-27T18:20:12',
+                remainingEstimateSeconds: -300,
             }
         },
-        issue_key_arr: ['PR-8', ''],
-        lang_code: 'ua-UA',
-        project_code: ''
+        issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
     };
     self.post_params_json = '';
     
@@ -360,7 +382,7 @@ angular.module('app.decisionApi', ['ngRoute'])
         .controller('DecisionApiProjactLangCtrl', DecisionApiProjactLangCtrl)
         .controller('DecisionApiIssueQualityCtrl', DecisionApiIssueQualityCtrl)
         .controller('DecisionApiAvailabilityDescriptionCtrl', DecisionApiAvailabilityDescriptionCtrl)
-        .controller('DecisionApiRecountingPriorityCtrl', DecisionApiRecountingPriorityCtrl)
+        .controller('DecisionApiPriorityClusteringCtrl', DecisionApiPriorityClusteringCtrl)
         .controller('DecisionApiGroupingByLinksCtrl', DecisionApiGroupingByLinksCtrl)
         .controller('DecisionApiClusteringByDescriptionCtrl', DecisionApiClusteringByDescriptionCtrl)
         .controller('DecisionApiSearchSimilarCtrl', DecisionApiSearchSimilarCtrl)
