@@ -43,6 +43,25 @@ function DecisionApiProjactLangCtrl($scope, $route, $http, $timeout){
     self.post_response = {};
     self.post_response_json = '';
     
+    self.post_subbmit = function (){
+        
+        $.ajax({
+            type: 'POST',
+            url: self.url + '?project_key=' + self.post_project_key,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Agile-Api-Key-Header", $scope.api_key);
+              },
+            data: self.post_params,
+            dataType: 'json'
+        }).done(function(data) { 
+           self.post_response_json = angular.toJson(data, true);
+           $timeout(function (){
+              $scope.$apply(); 
+           });
+        });        
+    };
+    
+    
     self.delete_project_key = '';
     
     $scope.$watch(function (){

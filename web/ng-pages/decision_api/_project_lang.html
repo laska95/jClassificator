@@ -53,9 +53,9 @@
         <p>Ключі задач:</p>
         <div class="row">
 
-            <div class="col-sm-4" ng-repeat="issue_key in self.post_params.issue_key_arr">
+            <div class="col-sm-4" ng-repeat="(n, issue_key) in self.post_params.issue_key_arr">
                 <div class="form-group">
-                    <input class="form-control" ng-model="issue_key">
+                    <input class="form-control" ng-model="self.post_params.issue_key_arr[n]">
                 </div>
             </div>
 
