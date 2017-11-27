@@ -16,7 +16,7 @@ namespace app\modules\decision\models;
 /** @property float $frequency */
 class FrequencyLang extends \yii\db\ActiveRecord {
 
-    use FrequencyLangTrait;
+    use FrequencyTrait;
 
     public function rules() {
         return [

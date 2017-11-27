@@ -34,7 +34,15 @@ class FullApiController extends \yii\web\Controller{
         }
         
         if (\Yii::$app->request->isPost){
-            $post = \Yii::$app->request->post();
+            $post = \Yii::$app->request->post();      
+            $project = \app\modules\jira\models\Project::findOne(['key' => $project_key, 'jira_url' => $this->_user->jiraUrl]);
+            if (!$project){
+                $project = new \app\modules\jira\models\Project();
+                $project->key = $project_key;
+                $project->jira_url = $this->_user->jiraUrl;
+                $project->save();
+            }
+            
             $issues_description = [];   
                         
             //задачі описані вручну
@@ -50,14 +58,18 @@ class FullApiController extends \yii\web\Controller{
             });
                         
             $jql = Issue::getJQuery(['key__in' => $issue_keys]);
-                        var_dump($jql);
             $issues = $provider->getIssueList($jql, ['description']);
             foreach ($issues->getResponse()['issues'] as $one){
                 $issues_description[] =  $one['fields']['description'];
             }
             
-            return ($issues_description);
-            //TO DO: з $issues_description повинно створювати словник 
+            $text = '';
+            foreach ($issues_description as $one) {
+                //видаляємо посилання
+                $text .= preg_replace('/(https?:\/\/)([\w\.-]+)\/?/u', '', $one);              
+            }
+            
+            return FrequencyProjectLang::createNew($text, $project->id);
         }
     }
 

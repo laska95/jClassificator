@@ -23,7 +23,7 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
             [['project_id', 'l'], 'integer'],
             [['code'], 'string', 'max' => 10],
             [['frequency'], 'double'],
-            [['lang_id', 'code', 'frequency'], 'required'],
+            [['project_id', 'code', 'frequency'], 'required'],
         ];
     }
 
@@ -36,25 +36,41 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
         }
     }
 
-    public static function createNew($text, $lang_id = 1) {
-//        FrequencyLang::deleteAll(['lang_id' => $lang_id]);
-//                
-//        foreach ([1, 2, 3] as $n){
-//            $fr = self::canculateFrequency($text, $n);
-//                        
-//            foreach ($fr as $c => $f){
-//                if ($f < 0.1/($n*10)){
-//                    continue;
-//                }
-//                
-//                $m = new FrequencyLang();
-//                $m->code = $c;
-//                $m->frequency = $f;
-//                $m->lang_id = $lang_id;
-//                $m->save();
-//            }
-//
-//        }
+    public static function createNew($text, $project_id) {
+  
+        foreach ([1, 5, 7] as $n){
+            $fr = self::canculateFrequency($text, $n);
+              
+            if ($n > 3){
+                arsort($fr);
+                $fr = array_slice($fr, 0, (int)(count($fr) * 0.32));
+            }
+
+            $old_fr  = self::find()->where([
+                    'project_id' => $project_id ?? 0,
+                ])->asArray()->all();
+            $old_fr = \yii\helpers\ArrayHelper::map($old_fr, 'code', 'frequency') ?? [];
+            
+            $fr = self::sumFrequency($old_fr, $fr);
+            
+            foreach ($fr as $c => $f){
+                if ($f < 0.1/($n*10)){
+                    continue;
+                }
+                
+                $m = new FrequencyProjectLang();
+                $m->code = $c;
+                $m->frequency = $f;
+                $m->project_id = $project_id;
+                $m->save();
+            }
+
+        }
+        
+        $new_fr  = self::find()->where([
+                'project_id' => $project_id ?? 0,
+            ])->asArray()->all();
+        return \yii\helpers\ArrayHelper::map($new_fr, 'code', 'frequency') ?? [];
     }
 
     public static function getFrequencyLangN($project_code, $user = NULL) {

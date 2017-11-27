@@ -34,7 +34,7 @@ trait FrequencyTrait {
 
     public static function sumFrequency($fr1, $fr2){
         $fr_new = [];
-        foreach ($fr1 as $c){
+        foreach ($fr1 as $c => $f){
             if (isset($fr2[$c])){
                 $fr_new[$c] = ($fr1[$c] + $fr2[$c]) / 2;
                 unset($fr1[$c]);
@@ -45,7 +45,7 @@ trait FrequencyTrait {
             }
         }
         
-        foreach ($fr2 as $c){
+        foreach ($fr2 as $c => $f){
             if (isset($fr1[$c])){
                 $fr_new[$c] = ($fr1[$c] + $fr2[$c]) / 2;
                 unset($fr1[$c]);
