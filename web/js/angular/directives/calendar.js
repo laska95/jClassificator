@@ -9,13 +9,12 @@ agile.directive('calendar', function ($filter) {
             ngModel.$parsers.push(function(value){
                 if (!value) return null;  
                 return moment(value, 'DD.MM.YYYY').format('YYYY-MM-DDTHH:mm:ss');
-                return $filter('date')(value, moment_date_format);
             });
            
             //відображення дати
             ngModel.$formatters.unshift(function (value) {
-                if (!value) return "";               
-                return  $filter('date')(value, date_format);
+                if (!value) return "";    
+                return moment(value, 'YYYY-MM-DDTHH:mm:ss').format('DD.MM.YYYY');
             });
 
             $(el).datepicker({

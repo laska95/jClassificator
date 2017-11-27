@@ -11,16 +11,18 @@ class FullApiController extends \yii\web\Controller{
     private $_user = NULL;
 
     public function beforeAction($action) {   
+        $this->_user = \Yii::$app->user->identity;
         
-        $api_key = \Yii::$app->request->headers->get('agile-api-key-header');
-        
-        if (!$api_key){
-            throw new \yii\web\ForbiddenHttpException();
-        }
-//        
-        $this->_user = \app\models\User::findOne(['apiKey' => $api_key]);
         if (!$this->_user){
-            throw new \yii\web\ForbiddenHttpException();
+            $api_key = \Yii::$app->request->headers->get('agile-api-key-header');
+            if (!$api_key){
+                throw new \yii\web\ForbiddenHttpException();
+            }
+            
+            $this->_user = \app\models\User::findOne(['apiKey' => $api_key]);
+            if (!$this->_user){
+                throw new \yii\web\ForbiddenHttpException();
+            }
         }
         
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
@@ -127,6 +129,48 @@ class FullApiController extends \yii\web\Controller{
                 $ret[$key] = \app\modules\decision\helpers\Decision::availabilityDescription($one, $this->_user);
             }
 
+            return $ret;
+        }
+    }
+    
+    public function actionPriorityClustering(){
+        if (\Yii::$app->request->isPost){
+            $post = \Yii::$app->request->post();
+            
+            $ret = [];
+            $provider = JiraProvider::getInstance();
+            $priorityList= $provider->getIssuePriority()->getResponse();
+            foreach ($priorityList as $one){
+                $ret[$one['id']] = [
+                    'class' => $one,
+                    'items' => []
+                ];
+            }
+            
+            foreach ($post['issue_arr'] as $one){
+               $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one);
+               $ret[$c]['items'][] = $one['key'];
+            }   
+            
+            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+            $jiraIssues = $provider->getIssueList($jql, ['duedate', 'timetracking', 'priority']);
+            if (isset($jiraIssues->getResponse()['issues'])){
+                foreach ($jiraIssues->getResponse()['issues'] as $one){
+                    
+                    $duedate = $one['fields']['duedate'];
+                    
+                    $one_arr = [
+                        'key' => $one['key'],
+                        'priority_id' => $one['fields']['priority']['id'],
+                        'duedate' => $duedate ? substr( $duedate, 0, -8) : null,
+                        'remainingEstimateSeconds' => $one['fields']['timetracking']['remainingEstimateSeconds'] ?? null
+                    ];
+                    
+                    $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one_arr);
+                    $ret[$c]['items'][] = $one['key'];
+                }
+            }
+            
             return $ret;
         }
     }

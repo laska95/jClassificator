@@ -192,7 +192,23 @@ function DecisionApiPriorityClusteringCtrl($scope, $route, $http, $timeout, Jira
     self.post_response = {};
     self.post_response_json = '';
     
+    self.url = '/decision/full-api/priority-clustering';
     self.post_subbmit = function (){
+        
+        $.ajax({
+            type: 'POST',
+            url: self.url,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Agile-Api-Key-Header", $scope.api_key);
+            },
+            data: self.post_params,
+            dataType: 'json'
+        }).done(function(data) { 
+           self.post_response_json = angular.toJson(data, true);
+           $timeout(function (){
+              $scope.$apply(); 
+           });
+        });  
         
     };
     
@@ -201,13 +217,13 @@ function DecisionApiPriorityClusteringCtrl($scope, $route, $http, $timeout, Jira
             1: {
                 key: 'PR-1',
                 priority_id: '2',
-                due_date: '2017-11-27T18:20:12',
+                duedate: '2017-11-27T18:20:12',
                 remainingEstimateSeconds: 600,
             },
             2: {
                 key: 'PR-2',
                 priority_id: '3',
-                due_date: '2017-10-27T18:20:12',
+                duedate: '2017-10-27T18:20:12',
                 remainingEstimateSeconds: -300,
             }
         },

@@ -42,8 +42,12 @@
                     </dropdown-select>
                 </div>                
                 <div class="form-group">
-                    <p>Дата здачі: {{issue.due_date}}</p>
-                    <input calendar ng-model="issue.due_date">
+                    <p>Дата здачі:</p>
+                    <input calendar ng-model="issue.duedate">
+                </div>
+                <div class="form-group">
+                    <p>Час, що залишився (c.):</p>
+                    <input type='number' ng-model="issue.remainingEstimateSeconds">
                 </div>
             </div>
 
