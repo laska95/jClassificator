@@ -174,4 +174,58 @@ class FullApiController extends \yii\web\Controller{
             return $ret;
         }
     }
+    
+    public function actionLinksClustering(){
+        if (\Yii::$app->request->isPost){
+            $post = \Yii::$app->request->post();
+            
+            $issues = $post['issue_arr'];
+            $provider = JiraProvider::getInstance();
+            
+            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+            $jiraIssues = $provider->getIssueList($jql, ['description']);
+            if (isset($jiraIssues->getResponse()['issues'])){
+                foreach ($jiraIssues->getResponse()['issues'] as $one){                 
+                    $issues[] = [
+                        'key' => $one['key'],
+                        'description' => $one['fields']['description'],
+                    ];
+                }
+            }
+            
+            $urls = \app\modules\decision\helpers\Decision::getAllLinks($issues);
+            $ret = ['0' => ['url' => null, 'items' => []]];
+            
+            foreach ($urls as $u){
+                $ret[] = [
+                        'url' => $u,
+                        'items' => []
+                    ];
+            }
+            
+            foreach ($issues as $one){
+                
+                $set = false;
+                
+                foreach ($ret as $i => $ret_one){
+                    
+                    if ($i == 0){
+                        continue;
+                    }
+                    
+                    $n = preg_match('#(' . preg_quote($ret_one['url']) . ')#', $one['description']);
+                    if ($n){
+                        $ret[$i]['items'][] = $one['key'];
+                        $set = TRUE;
+                    }
+                }
+                
+                if ($set == FALSE) {
+                    $ret[0]['items'][] = $one['key'];
+                }
+            }
+            
+            return $ret;
+        }
+    }
 }

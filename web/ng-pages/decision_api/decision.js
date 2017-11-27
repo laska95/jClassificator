@@ -239,28 +239,43 @@ function DecisionApiPriorityClusteringCtrl($scope, $route, $http, $timeout, Jira
     });
 }
 
-function DecisionApiGroupingByLinksCtrl($scope, $route, $http, $timeout){
+function DecisionApiLinksClusteringCtrl($scope, $route, $http, $timeout){
     var self = this;
+
+    self.url = '/decision/full-api/links-clustering';
 
     self.post_response = {};
     self.post_response_json = '';
     
     self.post_subbmit = function (){
-        
+        $.ajax({
+            type: 'POST',
+            url: self.url,
+            beforeSend: function(xhrObj) {
+                xhrObj.setRequestHeader("Agile-Api-Key-Header", $scope.api_key);
+            },
+            data: self.post_params,
+            dataType: 'json'
+        }).done(function(data) { 
+           self.post_response_json = angular.toJson(data, true);
+           $timeout(function (){
+              $scope.$apply(); 
+           });
+        });  
     };
     
     self.post_params = {
         issue_arr: {
             1: {
+                key: 'PR-1',
                 description: 'Ознайомитися з API',
             },
             2: {
-                description: '',
+                key: 'PR-2',
+                description: 'url  http://agile2.loc/decision/full-api/priority-clustering',
             }
         },
-        issue_key_arr: ['PR-8', ''],
-        lang_code: 'ua-UA',
-        project_code: ''
+        issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
     };
     self.post_params_json = '';
     
@@ -399,7 +414,7 @@ angular.module('app.decisionApi', ['ngRoute'])
         .controller('DecisionApiIssueQualityCtrl', DecisionApiIssueQualityCtrl)
         .controller('DecisionApiAvailabilityDescriptionCtrl', DecisionApiAvailabilityDescriptionCtrl)
         .controller('DecisionApiPriorityClusteringCtrl', DecisionApiPriorityClusteringCtrl)
-        .controller('DecisionApiGroupingByLinksCtrl', DecisionApiGroupingByLinksCtrl)
+        .controller('DecisionApiLinksClusteringCtrl', DecisionApiLinksClusteringCtrl)
         .controller('DecisionApiClusteringByDescriptionCtrl', DecisionApiClusteringByDescriptionCtrl)
         .controller('DecisionApiSearchSimilarCtrl', DecisionApiSearchSimilarCtrl)
         .run(function ($rootScope, $location, $anchorScroll, $routeParams){

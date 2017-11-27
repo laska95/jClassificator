@@ -74,8 +74,8 @@ class Decision {
         }
 
         $urls = [];
-        $url_count = preg_match_all('/(https?:\/\/[\w\.-]+)\/?/', $issue['description'], $urls);
-        $clean_url_desc = preg_replace('/(https?:\/\/[\w\.-]+)\/?/', '', $issue['description']);
+        $url_count = preg_match_all('/(https?:\/\/([\w\.-]+\/?)+)/', $issue['description'], $urls);
+        $clean_url_desc = preg_replace('/(https?:\/\/([\w\.-]+\/?)+)/', '', $issue['description']);
         $clean_noabc_desc = preg_replace('/[\W_]/u', '', $clean_url_desc);
 
         if (!$clean_noabc_desc && $url_count == 0) {
@@ -138,6 +138,21 @@ class Decision {
         }
 
         return $issue['priority_id'];
+    }
+    
+    public static function getAllLinks($issue_arr) {
+        $ret = [];
+        
+        foreach ($issue_arr as $one){
+            $urls = [];
+            preg_match_all('/(https?:\/\/([\w\.-]+\/?)+)/', $one['description'], $urls);
+            foreach ($urls[0] as $u){
+                $ret[] = $u;
+            }
+        }
+        $ret = array_unique($ret);
+        sort($ret);
+        return $ret;
     }
 
     private static function qDif($v1, $v2) {
