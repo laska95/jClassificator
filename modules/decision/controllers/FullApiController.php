@@ -59,10 +59,11 @@ class FullApiController extends \yii\web\Controller{
                         
             $jql = Issue::getJQuery(['key__in' => $issue_keys]);
             $issues = $provider->getIssueList($jql, ['description']);
-            foreach ($issues->getResponse()['issues'] as $one){
-                $issues_description[] =  $one['fields']['description'];
+            if (isset($issues->getResponse()['issues'])){
+                foreach ($issues->getResponse()['issues'] as $one){
+                    $issues_description[] =  $one['fields']['description'];
+                }
             }
-            
             $text = '';
             foreach ($issues_description as $one) {
                 //видаляємо посилання
@@ -79,13 +80,19 @@ class FullApiController extends \yii\web\Controller{
         
         if (\Yii::$app->request->isPost){
             $post = \Yii::$app->request->post();
-            $model = new Issue();
-            $model->description = $post['issue']['description'];     
             
-            $lang = $post['property']['lang_code'];
-            $prj = $post['property']['project_code'];
+            $ret = [];
             
-            return \app\modules\decision\helpers\Decision::textQuality($model->description, $lang, $prj);
+            $lang = $post['lang_code'];
+            $prj = $post['project_code'];
+                        
+            $issues = $post['issue_arr'];
+            foreach ($issues as $one){  
+                $ret[] =  \app\modules\decision\helpers\Decision::textQuality(
+                        $one['description'], $lang, $prj, $this->_user);
+            }
+
+            return $ret;
             
         }
         

@@ -67,7 +67,7 @@ class FrequencyLang extends \yii\db\ActiveRecord {
                     ])->asArray()->all();
         } else {
             $arr = self::find()->where([
-                        'lang_id' => $lang->id,
+                        'lang_id' => $lang->id ?? 1,
                         'l' => $n
                     ])->asArray()->all();
         }

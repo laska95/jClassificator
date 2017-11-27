@@ -38,7 +38,7 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
 
     public static function createNew($text, $project_id) {
   
-        foreach ([1, 5, 7] as $n){
+        foreach ([1, 5] as $n){
             $fr = self::canculateFrequency($text, $n);
               
             if ($n > 3){
@@ -52,6 +52,8 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
             $old_fr = \yii\helpers\ArrayHelper::map($old_fr, 'code', 'frequency') ?? [];
             
             $fr = self::sumFrequency($old_fr, $fr);
+            
+            self::deleteAll(['project_id' => $project_id ?? 0]);
             
             foreach ($fr as $c => $f){
                 if ($f < 0.1/($n*10)){
@@ -73,13 +75,14 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
         return \yii\helpers\ArrayHelper::map($new_fr, 'code', 'frequency') ?? [];
     }
 
-    public static function getFrequencyLangN($project_code, $user = NULL) {
+    public static function getFrequencyLangN($project_code, $user = NULL, $n = [1, 5, 7]) {
 
         $user = $user ?? \Yii::$app->user->identity;
-        $project = Project::findOne(['key' => $project_code, 'jira_url' => $user->jiraUrl]);
+        $project = \app\modules\jira\models\Project::findOne(['key' => $project_code, 'jira_url' => $user->jiraUrl]);
 
         $arr = self::find()->where([
                     'project_id' => $project->id ?? 0,
+                    'l' => $n
                 ])->asArray()->all();
 
         return \yii\helpers\ArrayHelper::map($arr, 'code', 'frequency') ?? [];

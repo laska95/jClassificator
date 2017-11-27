@@ -3,21 +3,26 @@
 namespace app\modules\decision\helpers;
 
 use \app\modules\decision\models\FrequencyLang;
+use \app\modules\decision\models\FrequencyProjectLang;
 
 class Decision {
     
-    public static function textQuality($text, $lang, $project = NULL){
+    public static function textQuality($text, $lang, $project = NULL, $user){
         
         //таблиця із словником
-        $f_class = \app\modules\decision\models\FrequencyLang::class;
-                
-        $f_text = FrequencyLang::canculateFrequency($text, 1);
-        $f_abc = $f_class::getFrequencyLangN($lang, 1);
 
+        if ($lang == 'project'){
+            $f_text = FrequencyProjectLang::canculateFrequency($text, 1);
+            $f_abc = FrequencyProjectLang::getFrequencyLangN($project, $user, 1);
+        } else {
+            $f_text = FrequencyLang::canculateFrequency($text, 1);
+            $f_abc = FrequencyLang::getFrequencyLangN($lang, 1);
+        }              
+                
         $d0 = self::qDif($f_abc, []);
         $d1 = self::qDif($f_text, $f_abc);
         $d1_norm = 100 - self::normDef($d0, $d1);
-              
+ 
         $word_cout = preg_match_all('/\w/u', $text);
         $no_word_cout = preg_match_all('/\W/u', $text);
         $no_word_cout2 = preg_match_all('/\W{2,}/u', $text);
