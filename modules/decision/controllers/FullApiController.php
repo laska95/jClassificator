@@ -180,11 +180,13 @@ class FullApiController extends \yii\web\Controller {
                 ];
             }
 
-            foreach ($post['issue_arr'] as $one) {
-                $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one);
-                $ret[$c]['items'][] = $one['key'];
+            if (isset($post['issue_arr'])){
+                foreach ($post['issue_arr'] as $one) {
+                    $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one);
+                    $ret[$c]['items'][] = $one['key'];
+                }
             }
-
+            
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
             $jiraIssues = $provider->getIssueList($jql, ['duedate', 'timetracking', 'priority']);
             if (isset($jiraIssues->getResponse()['issues'])) {

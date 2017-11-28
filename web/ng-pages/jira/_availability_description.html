@@ -1,0 +1,30 @@
+<div ng-if="self.selectedDoneFilter == 'AD'">
+    <issue-as-table 
+        issue-key-list="self.resultAD[1].items" 
+        active="self.activeIssueKey" 
+        title="Добре описані задачі:" 
+        loadQuality="true">
+    </issue-as-table>
+
+
+    <issue-as-table 
+        issue-key-list="self.resultAD[2].items" 
+        active="self.activeIssueKey" 
+        title="Не описані задачі:" 
+        loadQuality="false">
+    </issue-as-table>
+
+    <issue-as-table 
+        issue-key-list="self.resultAD[3].items" 
+        active="self.activeIssueKey" 
+        title="Погано описані задачі:" 
+        loadQuality="true">
+    </issue-as-table>
+
+    <issue-as-table 
+        issue-key-list="self.resultAD[4].items" 
+        active="self.activeIssueKey" 
+        title="Опис завдання складається тільки з посилань:" 
+        loadQuality="false">
+    </issue-as-table>
+</div>

@@ -1,6 +1,7 @@
 
 .ls-inline-block {
-    display: inline-block !important;
+    /*display: inline-block !important;*/
+    height: 20px;
 }
 
 .ls-inline {

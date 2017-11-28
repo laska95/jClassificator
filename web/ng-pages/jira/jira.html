@@ -1,5 +1,5 @@
 <div ng-controller="JiraController as self" class="row">
-    
+
     <div class="col-md-3">
         <div>
             <!-- Список фільтрів -->
@@ -17,20 +17,20 @@
 
         <div class="row container ">
             <!-- Список задач, що відповідають фільтру -->
-            <div class="col-md-3 ls-issuel-list">
+            <div class="col-md-3">
                 <ul class="list-group">
                     <li ng-repeat="oneIssue in self.issueList">
-                        <issue-as-list issue="oneIssue" 
-                            active="self.activeIssueKey"
-                            selected-arr="self.selectedIssue">                
-                        </issue-as-list>
+                    <issue-as-list issue="oneIssue" 
+                                   active="self.activeIssueKey"
+                                   selected-arr="self.selectedIssue">                
+                    </issue-as-list>
                     </li>
                 </ul>    
             </div>
 
             <!-- TO DO: пагінація по підгружених задачах -->
         </div>
-    
+
     </div>
 
     <div ng-class="self.ifActiveIssue()?'col-md-6':'col-md-8'">
@@ -40,48 +40,20 @@
         </div>
         <div>
             <!-- Результат анілізу задач -->
-            <div ng-if="self.selectedDoneFilter=='AD'">
-                <issue-as-table 
-                    issue-key-list="self.resultAD[1].items" 
-                    active="self.activeIssueKey" 
-                    title="Добре описані задачі:" 
-                    loadQuality="true">
-                </issue-as-table>
+            <div>
+                <div ng-include="'ng-pages/jira/_availability_description.html'">
+                </div>
             </div>
-            
-            <div ng-if="self.selectedDoneFilter=='AD'">
-                <issue-as-table 
-                    issue-key-list="self.resultAD[2].items" 
-                    active="self.activeIssueKey" 
-                    title="Не описані задачі:" 
-                    loadQuality="true">
-                </issue-as-table>
-            </div>
-            
-            <div ng-if="self.selectedDoneFilter=='AD'">
-                <issue-as-table 
-                    issue-key-list="self.resultAD[3].items" 
-                    active="self.activeIssueKey" 
-                    title="Погано описані задачі:" 
-                    loadQuality="true">
-                </issue-as-table>
-            </div>
-            
-            <div ng-if="self.selectedDoneFilter=='AD'">
-                <issue-as-table 
-                    issue-key-list="self.resultAD[4].items" 
-                    active="self.activeIssueKey" 
-                    title="Опис завдання складається тільки з посилань:" 
-                    loadQuality="true">
-                </issue-as-table>
+            <div>
+                <div ng-include="'ng-pages/jira/_priority_clustering.html'">
+                </div>
             </div>
         </div>
+
+
+        <!-- Детальна інформація по задачі -->
+        <div class="col-md-3 pull-right">
+            <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
+        </div>
+
     </div>
-    
-    
-    <!-- Детальна інформація по задачі -->
-    <div class="col-md-3 pull-right">
-        <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
-    </div>
-    
-</div>

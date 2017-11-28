@@ -119,17 +119,17 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     self.selectedDoneFilter = '';
 
     self.resultAD = {};
+    self.resultPC = {};
+    self.resultLC = {};
 
     self.filterList = [
         {
             key: 'AD', //AvailabilityDescription
             label: 'Перевірка якісті опису',
-            url: '/decision/full-api/availability-description'
         },
         {
             key: 'PC', //DecisionApiPriorityClusteringCtrl
             label: 'Класифікація за пріортетом',
-            url: '/decision/full-api/priority-clustering'
         },
         {
             key: 'LC', //DecisionApiLinksClusteringCtrl
@@ -146,10 +146,69 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     self.applyFilter = function () {
         if (self.selectedFilter === 'AD') {
             adApply();
+        } else if (self.selectedFilter === 'PC') {
+            pcApply();
+        } else if (self.selectedFilter === 'LC') {
+            lcApply();
         }
+
     };
 
     var adApply = function () {
+        var url = '/decision/full-api/availability-description';
+
+        var issue_keys = [];
+        angular.forEach(self.issueList, function (one) {
+            issue_keys.push(one.key);
+        });
+
+        var post = {
+            issue_arr: {},
+            issue_key_arr: issue_keys,
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: post,
+            dataType: 'json'
+        }).done(function (data) {
+            self.resultAD = data;
+            self.selectedDoneFilter = 'AD';
+            $timeout(function () {
+                $scope.$apply();
+            });
+        });
+    };
+    
+    var pcApply = function () {
+        var url = '/decision/full-api/priority-clustering';
+
+        var issue_keys = [];
+        angular.forEach(self.issueList, function (one) {
+            issue_keys.push(one.key);
+        });
+
+        var post = {
+            issue_arr: {},
+            issue_key_arr: issue_keys,
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: post,
+            dataType: 'json'
+        }).done(function (data) {
+            self.resultPC = data;
+            self.selectedDoneFilter = 'PC';
+            $timeout(function () {
+                $scope.$apply();
+            });
+        });
+    };
+    
+    var lcApply = function () {
         var url = '/decision/full-api/availability-description';
 
         var issue_keys = [];
