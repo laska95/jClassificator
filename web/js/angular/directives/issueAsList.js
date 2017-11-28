@@ -13,9 +13,7 @@ agile.directive('issueAsList', function () {
         controller: function ($scope, $element, $attrs, $location, $timeout) {
               
             $scope.select = false;
-            
-            console.log($scope.selectedArr);
-            
+                        
             $scope.toggleSelect = function (){
                 console.log('toggleSelect -> ' + $scope.select);
                 //$scope.select - значення після кліку 

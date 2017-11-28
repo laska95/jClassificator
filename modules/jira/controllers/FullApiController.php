@@ -31,29 +31,64 @@ class FullApiController extends \yii\web\Controller{
     }
     
     public function actionGetProjectList(){
-        $provider = JiraProvider::getInstance();
-        $res = $provider->getProjectList();
-        $this->configureResponse($res);
-        return $res->response;
+        
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+        $cache_key = 'GetProjectList' .$user_id;
+        
+        $val = $cache->get($cache_key);
+        if ($val === false){
+            $provider = JiraProvider::getInstance();
+            $res = $provider->getProjectList();
+            $this->configureResponse($res);
+            $val = $res->response;
+            $cache->set($res->response, 60*3);
+        }
+        
+        return $val; 
+        
     }
     
     public function actionGetIssueStatusList(){
-        $provider = JiraProvider::getInstance();
-        $res = $provider->getIssueStatusList();
-        $this->configureResponse($res);
-        return $res->response;
+        
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+        $cache_key = 'GetIssueList' .$user_id;
+        
+        $val = $cache->get($cache_key);
+        if ($val === false){
+            $provider = JiraProvider::getInstance();
+            $res = $provider->getIssueStatusList();
+            $this->configureResponse($res);
+            $val = $res->response;
+            $cache->set($res->response, 60*3);
+        }
+        
+        return $val;    
     }
     
     public function actionGetIssueList(){
         $get = \Yii::$app->request->get();
         $jql = Issue::getJQuery($get);
-        $fields = Issue::getLoadFields();
-        $startAt = $get['startAt'] ?? 0;
         
-        $provider = JiraProvider::getInstance();
-        $res = $provider->getIssueList($jql, $fields, $startAt);
-        $this->configureResponse($res);
-        return $res->response;
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+        $cache_key = 'GetIssueList'. $user_id . json_encode($jql);
+        
+        $val = $cache->get($cache_key);
+        if ($val === false){
+            $fields = Issue::getLoadFields();
+            $startAt = $get['startAt'] ?? 0;
+
+            $provider = JiraProvider::getInstance();
+            $res = $provider->getIssueList($jql, $fields, $startAt);
+            $this->configureResponse($res);
+            $val = $res->response;
+            
+            $cache->set($res->response, 60*3);
+        } 
+
+        return $val;
     }
 
     public function actionGetIssue($key){
@@ -70,11 +105,21 @@ class FullApiController extends \yii\web\Controller{
 //        return $res->response;
     }
 
-    public function actionGetIssuePriority(){
-        $provider = JiraProvider::getInstance();
-        $res = $provider->getIssuePriority();
-        $this->configureResponse($res);
-        return $res->response;
+    public function actionGetIssuePriority(){        
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+        $cache_key = 'GetIssueList' .$user_id;
+        
+        $val = $cache->get($cache_key);
+        if ($val === false){
+            $provider = JiraProvider::getInstance();
+            $res = $provider->getIssuePriority();
+            $this->configureResponse($res);
+            $val = $res->response;
+            $cache->set($res->response, 60*3);
+        }
+        
+        return $val;    
     }
 
     /**

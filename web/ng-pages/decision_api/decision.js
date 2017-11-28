@@ -147,16 +147,18 @@ function DecisionApiAvailabilityDescriptionCtrl($scope, $route, $http, $timeout)
     self.post_params = {
         issue_arr: {
             1: {
+                key: 'PR-1',
                 description: 'Ознайомитися з API',
                 summary: 'Задача 1'
             },
             2: {
-                description: '',
+                key: 'PR-2',
+                description: '...',
+                summary: 'Задача 2'
             }
         },
         issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
-        lang_code: 'ua-UA',
-        project_code: ''
+
     };
     self.post_params_json = '';
     

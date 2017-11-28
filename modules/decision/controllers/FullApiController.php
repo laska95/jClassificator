@@ -7,6 +7,7 @@ use \app\modules\decision\models\FrequencyProjectLang;
 use \app\modules\jira\providers\JiraProvider;
 use \app\modules\decision\helpers\Parser;
 use \app\modules\decision\helpers\Word;
+use \app\modules\decision\helpers\Decision;
 
 class FullApiController extends \yii\web\Controller {
 
@@ -101,15 +102,13 @@ class FullApiController extends \yii\web\Controller {
         if (\Yii::$app->request->isPost) {
             $post = \Yii::$app->request->post();
 
-            $lang = $post['lang_code'];
-            $prj = $post['project_code'];
-
             $issues = [];
-            foreach ($post['issue_arr'] as $key => $one) {
-                $one['key'] = $key;
-                $issues[$key] = $one;
+            if (isset($post['issue_arr'])) {
+                foreach ($post['issue_arr'] as $key => $one) {
+                    $one['key'] = $key;
+                    $issues[$key] = $one;
+                }
             }
-
             $provider = JiraProvider::getInstance();
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
             $jiraIssues = $provider->getIssueList($jql, ['description', 'summary']);
@@ -128,7 +127,42 @@ class FullApiController extends \yii\web\Controller {
                 $ret[$key] = \app\modules\decision\helpers\Decision::availabilityDescription($one, $this->_user);
             }
 
-            return $ret;
+            $ret0 = [
+                Decision::AD_GOOD => [
+                    'class' => [
+                        'id' => Decision::AD_GOOD,
+                        'label' => Decision::getAD_Labels()[Decision::AD_GOOD]
+                    ],
+                    'items' => []
+                ],
+                Decision::AD_EMPTY => [
+                    'class' => [
+                        'id' => Decision::AD_EMPTY,
+                        'label' => Decision::getAD_Labels()[Decision::AD_EMPTY]
+                    ],
+                    'items' => []
+                ],
+                Decision::AD_BAD => [
+                    'class' => [
+                        'id' => Decision::AD_BAD,
+                        'label' => Decision::getAD_Labels()[Decision::AD_BAD]
+                    ],
+                    'items' => []
+                ],
+                Decision::AD_ONLY_URL => [
+                    'class' => [
+                        'id' => Decision::AD_ONLY_URL,
+                        'label' => Decision::getAD_Labels()[Decision::AD_ONLY_URL]
+                    ],
+                    'items' => []
+                ]
+            ];
+            
+            foreach ($ret as $issue_key => $val){
+                $ret0[$val['value']]['items'][] = $issue_key;
+            }
+            
+            return $ret0;
         }
     }
 
@@ -231,37 +265,37 @@ class FullApiController extends \yii\web\Controller {
     public function actionTextClustering() {
 
         if (\Yii::$app->request->isPost) {
-            
+
             $post = \Yii::$app->request->post();
 
             $issues = $post['issue_arr'];
-            
+
             $all_keys = [];
             $all_text = '';
-            
-            foreach ($issues as $one){
+
+            foreach ($issues as $one) {
                 $f_one = [];
-                $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
+                $t0 = $one['summary'] . ' ' . $one['summary'] . ' ' . $one['summary'];
                 $t1 = $one['description'];
                 $t0 .= ' ' . $t1;
 
                 $t1 = preg_replace('#\W#u', ' ', $t0);
                 $t1 = preg_replace('#( {2,})#u', ' ', $t1);
-                
+
                 $f5_one = \app\modules\decision\models\FrequencyLang::canculateFrequency($t1, 5);
-                asort($f5_one); 
+                asort($f5_one);
                 $f5_one = array_slice($f5_one, 0.32 * count($f5_one), 0.68 * count($f5_one));
                 $all_keys = array_merge($all_keys, array_keys($f5_one));
 
                 $all_text .= $t1;
             }
-            
+
             $w = [];
-            foreach ($issues as $one){
+            foreach ($issues as $one) {
                 $w[$one['key']] = [];
-                $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
-                $one_text = $t0 . ' '. $one['description'];
-                foreach ($all_keys as $f_code){
+                $t0 = $one['summary'] . ' ' . $one['summary'] . ' ' . $one['summary'];
+                $one_text = $t0 . ' ' . $one['description'];
+                foreach ($all_keys as $f_code) {
                     $n = preg_match_all("#{$f_code}#", $one_text);
                     $w[$one['key']][$f_code] = $n;
                 }
@@ -269,8 +303,6 @@ class FullApiController extends \yii\web\Controller {
 
             return \app\modules\decision\helpers\Decision::clustering($w);
         }
-        
     }
-
 
 }

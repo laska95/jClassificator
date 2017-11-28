@@ -12,6 +12,21 @@
     overflow-y: scroll;
 }
 
+.ls-self-table{
+    padding: 5px;
+}
+
+.ls-issuel-table-row{
+    border: 1px solid #e3e3e3;
+    margin: 2px;
+}
+
+.ls-issuel-table{
+    max-height: 250px; 
+    overflow-y: scroll;
+    border: 1px solid #e3e3e3;
+}
+
 .ls-short-content{
     max-height: 120px;
     max-width: 230px;
@@ -30,4 +45,8 @@
     width: 20px;
     background-color: silver;
     display: inline !important;
+}
+
+.ls-md-input{
+    width: 300px;
 }

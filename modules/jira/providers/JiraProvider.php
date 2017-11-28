@@ -159,7 +159,7 @@ class JiraProvider {
         return $ret;
     }
 
-    public function getIssueList($jql, $fields = '*', $startAt = 0, $maxResults = 50){
+    public function getIssueList($jql, $fields = '*', $startAt = 0, $maxResults = 20){
         $post = [
             'jql' => $jql,
             'startAt' => $startAt,

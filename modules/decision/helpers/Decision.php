@@ -67,7 +67,6 @@ class Decision {
     }
 
     public static function availabilityDescription($issue, $user) {
-//        var_dump($issue);
         preg_match('/(^[[:upper:]]+\-)/U', $issue['key'], $project_key);
         if (isset($project_key[0]) && is_string($project_key[0])) {
             $project_key = substr($project_key[0], 0, -1);
