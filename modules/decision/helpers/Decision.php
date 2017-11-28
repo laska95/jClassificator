@@ -139,14 +139,14 @@ class Decision {
 
         return $issue['priority_id'];
     }
-    
+
     public static function getAllLinks($issue_arr) {
         $ret = [];
-        
-        foreach ($issue_arr as $one){
+
+        foreach ($issue_arr as $one) {
             $urls = [];
             preg_match_all('/(https?:\/\/([\w\.-]+\/?)+)/', $one['description'], $urls);
-            foreach ($urls[0] as $u){
+            foreach ($urls[0] as $u) {
                 $ret[] = $u;
             }
         }
@@ -179,6 +179,290 @@ class Decision {
     private static function normDef($d0, $d1) {
 
         return ($d1 * 100) / $d0;
+    }
+
+    
+    /**
+     * @param array $p масив з векторами, які треба кластеризувати
+     * @return array масив з кластерами
+     */
+    public static function clustering($w) {
+
+        $full_graph = self::fullGraph($w);
+//        return $full_graph;
+        $tree = self::tree_prime($full_graph, $w);
+
+        var_dump($tree);
+        $clusters = self::getClusters($tree);
+        $ww = self::fullGraph($w);
+        $F0 = self::getTestF($w);
+        for ($i = 0; $i < count($ww)/2; $i++) {
+            $is_ok = true;
+var_dump('-------------------------------------');
+            foreach ($clusters as $one) {
+                
+                $F = self::getF($one, $w, $ww, $tree);
+                var_dump($F);
+                if ($F < $F0) {
+                    $is_ok = FALSE;
+//                    break;
+                }
+            }
+
+            if (!$is_ok) {
+                $tree = self::divTree($tree, $one, $F0, $w, $ww);
+                $clusters = self::getClusters($tree);
+                var_dump($clusters);
+            } else {
+                break;
+            }
+        }
+
+//        return $tree;
+        die();
+//        
+//        $F = self::getF($clusters, $w, $ww);
+//        
+//        var_dump($F0, $F);
+//        die();
+//        $max = self::max2($tree);
+//        foreach ($tree as $key1 => $w1){
+//            foreach ($w1 as $key2 => $v){
+//                if ($v == $max){
+//                    unset($tree[$key1][$key2]);
+//                    unset($tree[$key2][$key1]);
+//                    $clusters = self::getClusters($tree);
+//                    break(2);
+//                }
+//            }
+//        }
+//       $F0 = self::getTestF($w);
+//       $F = self::getF($clusters, $w, $ww);
+//        var_dump($F0, $F);
+//        die();
+        return $tree;
+    }
+
+    private static function divTree($tree, $cluster) {
+        try {
+            $max = self::max2($tree, $cluster);
+        } catch (\Exception $ex) {
+            var_dump('+++++++++++++++++++++++++++');
+            var_dump($tree);
+            var_dump($cluster)
+            ;
+            die();
+        }
+
+        foreach ($tree as $key1 => $w1) {
+            if (in_array($key1, $cluster)) {
+                foreach ($w1 as $key2 => $v) {
+                    if ($v == $max) {
+                        unset($tree[$key1][$key2]);
+                        unset($tree[$key2][$key1]);
+                        break(2);
+                    }
+                }
+            }
+        }
+
+        return $tree;
+    }
+
+    private static function getClusters($tree) {
+        $clusters = [];
+
+        foreach ($tree as $key1 => $w1) {
+            $g = [$key1];
+
+            foreach ($w1 as $key2 => $v) {
+                if ($v > 0) {
+                    $g[] = $key2;
+                }
+            }
+
+            $ci = [];
+            foreach ($g as $gkey) {
+                $gi_arr = self::getClusterIndexs($clusters, $gkey);
+                foreach ($gi_arr as $one_g){
+                    $ci[] = $one_g;
+                }
+            }
+
+
+            if (empty($ci)) {
+                //new cluster
+                $clusters[] = $g;
+            } elseif (count($ci) == 1) {
+                //old cluster
+                $ci = $ci[0];
+                $clusters[$ci] = array_merge($clusters[$ci], $g);
+            } else {
+                foreach ($ci as  $c){
+                    $g = array_merge($g, $clusters[$c]); 
+                }
+                
+                foreach ($ci as  $c){
+                    unset($clusters[$c]);
+                }
+                
+                 $clusters[] = $g;
+            }
+            
+        }
+
+        foreach ($clusters as $ci => $one) {
+            $clusters[$ci] = array_unique($one);
+        }
+
+        return $clusters;
+    }
+
+    private static function getClusterIndexs($clusters, $key) {
+        $i = [];
+        foreach ($clusters as $ci => $one) {
+            if (in_array($key, $one)) {
+                $i[] = $ci;
+            }
+        }
+        return $i;
+    }
+
+    /**
+     * @return array матриця із різницями довжин між усіма векторами
+     */
+    private static function fullGraph($w, $def = null) {
+        $ww = [];
+        $keys = array_keys($w);
+
+        foreach ($keys as $k1) {
+            $ww[$k1] = [];
+            foreach ($keys as $k2) {
+                $ww[$k1][$k2] = $def;
+            }
+        }
+
+        if ($def === null) {
+            foreach ($ww as $key1 => $one_ww) {
+                foreach ($one_ww as $key2 => $v2) {
+                    $d = self::qDif($w[$key1], $w[$key2]);
+                    $ww[$key1][$key2] = $d;
+                }
+            }
+        }
+
+        return $ww;
+    }
+
+    /**
+     * @param type $w - вектор ознак
+     * @param array $ww - fullGraph
+     * @return array просте дерево
+     */
+    private static function tree_prime($ww, $w) {
+        $ww_tree = self::fullGraph($w, 0);
+        $no_in_tree = array_keys($w);
+        $in_tree = [$no_in_tree[0]];
+        unset($no_in_tree[0]);
+        $i = 0;
+        while (count($no_in_tree) > 0) {
+            $ww0 = self::fullGraph($w, 0);
+            foreach ($in_tree as $key_in_tree) {
+                foreach ($no_in_tree as $key_no_in_tree) {
+                    $ww0[$key_in_tree][$key_no_in_tree] = $ww[$key_in_tree][$key_no_in_tree];
+                }
+            }
+
+            $w_min = self::min2($ww0);
+            foreach ($in_tree as $key_in_tree) {
+                foreach ($no_in_tree as $key_no_in_tree) {
+                    if ($ww0[$key_in_tree][$key_no_in_tree] == $w_min) {
+                        $in_tree[] = $key_no_in_tree;
+                        unset($no_in_tree[array_search($key_no_in_tree, $no_in_tree)]);
+                        $ww_tree[$key_in_tree][$key_no_in_tree] = $w_min;
+                        $ww_tree[$key_no_in_tree][$key_in_tree] = $w_min;
+                        break (2);
+                    }
+                }
+            }
+
+            if ($i > 100) {
+                break;
+            }
+        }
+        return $ww_tree;
+    }
+
+    private static function getTestF($w) {
+        //http://www.tsi.lv/sites/default/files/editor/science/Research_journals/Tr_Tel/2003/V1/yatskiv_gousarova.pdf
+
+        $n = count($w);
+        $p = count(array_shift($w));
+        $z = 0; //0.5
+
+        return 1 - 2 / ($n * $p);
+    }
+
+    private static function getF($cluster, $w, $ww, $tree) {
+
+        $w1 = self::getDW2($w, $ww, array_keys($w));
+
+        //тестове розбиття
+        $tree_test = self::divTree($tree, $cluster);
+        $clusters_text = self::getClusters($tree_test);
+        $w2 = [];
+        foreach ($clusters_text as $c) {
+            $w2[] = self::getDW2($w, $ww, $c);
+        }
+
+        return array_sum($w2) / ($w1);
+    }
+
+    private static function getDW2($w, $ww, $elem) {
+        $sum = 0;
+        foreach ($elem as $key_from) {
+            foreach ($elem as $key_to) {
+                try {
+                    $v = $ww[$key_from][$key_to];
+                    if ($v > 0) {
+                        $sum += $v * $v;
+                    }
+                } catch (\Exception $ex) {
+                    var_dump("EX 410");
+                    var_dump($key_from, $key_to);
+                    var_dump($ww);
+                    die();
+                }
+            }
+        }
+        return $sum / 2;
+    }
+
+    private static function max2($ww, $cluster = null) {
+
+        $cluster = ($cluster === NULL) ? array_keys($ww) : $cluster;
+
+        $all = [];
+        foreach ($ww as $k1 => $w) {
+            if (in_array($k1, $cluster)) {
+                foreach ($w as $k2 => $v) {
+                    $all[] = $v;
+                }
+            }
+        }
+        return max($all) ?? -1;
+    }
+
+    private static function min2($ww, $start = 0) {
+        $all = [];
+        foreach ($ww as $w) {
+            foreach ($w as $v) {
+                if ($v > $start) {
+                    $all[] = $v;
+                }
+            }
+        }
+        return min($all);
     }
 
 }

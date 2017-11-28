@@ -236,10 +236,11 @@ class FullApiController extends \yii\web\Controller {
 
             $issues = $post['issue_arr'];
             
-            
+            $f5_keys = [];
             $all_text = '';
             
             foreach ($issues as $one){
+                $f_one = [];
                 $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
                 $t1 = $one['description'];
                 $t0 .= ' ' . $t1;
@@ -247,101 +248,29 @@ class FullApiController extends \yii\web\Controller {
                 $t1 = preg_replace('#\W#u', ' ', $t0);
                 $t1 = preg_replace('#( {2,})#u', ' ', $t1);
                 
+                $f5_one = \app\modules\decision\models\FrequencyLang::canculateFrequency($t1, 5);
+                asort($f5_one); 
+                $f5_one = array_slice($f5_one, 0.32 * count($f5_one), 0.68 * count($f5_one));
+                $f5_keys = array_merge($f5_keys, array_keys($f5_one));
+
                 $all_text .= $t1;
             }
             
-            $f5 = \app\modules\decision\models\FrequencyLang::canculateFrequency($all_text, 5);
-            asort($f5);
-            $f5 = array_slice($f5, 0.68 * count($f5));  //вектор ключових слів
             $w = [];
             foreach ($issues as $one){
                 $w[$one['key']] = [];
                 $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
                 $one_text = $t0 . ' '. $one['description'];
-                foreach ($f5 as $f_code => $f_one){
+                foreach ($f5_keys as $f_code){
                     $n = preg_match_all("#{$f_code}#", $one_text);
                     $w[$one['key']][$f_code] = $n;
                 }
             }
-            
-            return self::tree($w);
+
+            return \app\modules\decision\helpers\Decision::clustering($w);
         }
         
     }
 
-    
-    private function tree($w){
-        $ww = [];
-        $keys = array_keys($w);
-                
-        foreach ($keys as $k1){
-            $ww[$k1] = [];
-            foreach ($keys as $k2){
-                $ww[$k1][$k2] = 0;
-            }
-        }
 
-        $ww_tree = $ww;
-        
-        $all_d = [];
-        foreach ($ww as $key1 => $one_ww){
-            foreach ($one_ww as $key2 =>$v2){
-                $d = \app\modules\decision\helpers\Decision::qDif($w[$key1], $w[$key2]);
-                $ww[$key1][$key2] = $d;
-                if ($d >0){
-                    $all_d[] = $d;
-                }
-                
-            }
-        }
-      
-        $in_tree = [];
-        $i = 0;
-        while (count($in_tree) < count($keys)){
-            $w_min = self::min2($ww);
-            
-            foreach ($ww as $k1 => $v1){
-                foreach ($v1 as $k2 => $v){
-                    if ($v == $w_min){
-                        $in_tree[] = $k1;
-                        $in_tree[] = $k2;
-                        $in_tree = array_unique($in_tree);
-                        $ww[$k1][$k2] = -1;
-                        $ww[$k2][$k1] = -1;
-                        $ww_tree[$k1][$k2] = $w_min;
-                        $ww_tree[$k2][$k1] = $w_min;
-                        break (2);
-                    }
-                }
-            }
-            
-            $i++;
-            if ($i > 100)                break;
-        }
-        
-        return $ww_tree;
-    }
-    
-    private static function max2($ww){
-        $all = [];
-        foreach ($ww as $w){
-            foreach ($w as $v){
-                $all[] = $v;
-            }
-        }
-        return max($all);
-    }
-    
-    private static function min2($ww){
-        $all = [];
-        foreach ($ww as $w){
-            foreach ($w as $v){
-                if ($v > 0){
-                    $all[] = $v;
-                }
-                
-            }
-        }
-        return min($all);
-    }
 }
