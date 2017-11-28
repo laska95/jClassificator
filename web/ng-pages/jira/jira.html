@@ -33,7 +33,7 @@
 
     </div>
 
-    <div ng-class="self.ifActiveIssue()?'col-md-6':'col-md-8'">
+    <div ng-class="self.ifActiveIssue() ? 'col-md-6' : 'col-md-8'">
         <div>
             <!-- Список фільтрів для кластеризації вибраних задач -->
             <div ng-include="'ng-pages/jira/_filters.html'" ></div>
@@ -59,9 +59,12 @@
         </div>
 
 
-        <!-- Детальна інформація по задачі -->
-        <div class="col-md-3 pull-right">
-            <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
-        </div>
+
 
     </div>
+
+    <!-- Детальна інформація по задачі -->
+    <div class="col-md-3 pull-right ls-issue-detail">
+        <issue-detail-view issue="self.activeIssue" active="self.activeIssueKey"></issue-detail-view>
+    </div>     
+</div>

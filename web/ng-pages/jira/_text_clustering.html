@@ -1,6 +1,5 @@
 <div ng-if="self.selectedDoneFilter == 'TC'">
-
-    <div ng-repeat="(ci, cluster) in self.resultTC">
+    <div ng-repeat="(ci, cluster) in self.resultTC"">
         <issue-as-table 
             issue-key-list="cluster" 
             active="self.activeIssueKey" 

@@ -1,6 +1,6 @@
 
 .ls-inline-block {
-    /*display: inline-block !important;*/
+    display: inline-block !important;
     height: 20px;
 }
 
@@ -50,4 +50,9 @@
 
 .ls-md-input{
     width: 300px;
+}
+
+.ls-issue-detail{
+    position: fixed;
+    right: 30px;
 }
