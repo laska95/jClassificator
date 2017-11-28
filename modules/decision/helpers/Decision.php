@@ -155,7 +155,7 @@ class Decision {
         return $ret;
     }
 
-    private static function qDif($v1, $v2) {
+    public static function qDif($v1, $v2) {
         $s2 = 0; //сума різниці квадратів
 
         foreach ($v1 as $c => $f) {
