@@ -186,7 +186,7 @@ class Decision {
      * @return array масив з кластерами
      */
     public static function clustering($w) {
-
+ini_set('memory_limit', '256M');
         $full_graph = self::fullGraph($w);
         $tree = self::tree_prime($full_graph, $w);
 

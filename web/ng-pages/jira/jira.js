@@ -121,6 +121,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     self.resultAD = {};
     self.resultPC = {};
     self.resultLC = {};
+    self.resultTC = {};
 
     self.filterList = [
         {
@@ -138,7 +139,6 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         {
             key: 'TC', //DecisionApiLinksClusteringCtrl
             label: 'Кластиризація за описом',
-            url: '/decision/full-api/text-clustering'
         },
     ];
 
@@ -149,6 +149,8 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             pcApply();
         } else if (self.selectedFilter === 'LC') {
             lcApply();
+        } else if (self.selectedFilter === 'TC') {
+             tcApply();
         }
 
     };
@@ -226,9 +228,36 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             data: post,
             dataType: 'json'
         }).done(function (data) {
-            console.log(data);
             self.resultLC = data;
             self.selectedDoneFilter = 'LC';
+            $timeout(function () {
+                $scope.$apply();
+            });
+        });
+    };
+    
+    var tcApply = function () {
+        var url = '/decision/full-api/text-clustering';
+
+        var issue_keys = [];
+        angular.forEach(self.issueList, function (one) {
+            issue_keys.push(one.key);
+        });
+
+        var post = {
+            issue_arr: {},
+            issue_key_arr: issue_keys,
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: post,
+            dataType: 'json'
+        }).done(function (data) {
+            console.log(data);
+            self.resultTC = data;
+            self.selectedDoneFilter = 'TC';
             $timeout(function () {
                 $scope.$apply();
             });

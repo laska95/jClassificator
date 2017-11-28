@@ -270,7 +270,20 @@ class FullApiController extends \yii\web\Controller {
 
             $post = \Yii::$app->request->post();
 
-            $issues = $post['issue_arr'];
+            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [] ;
+            $provider = JiraProvider::getInstance();
+
+            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+            $jiraIssues = $provider->getIssueList($jql, ['description', 'summary']);
+            if (isset($jiraIssues->getResponse()['issues'])) {
+                foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                    $issues[] = [
+                        'key' => $one['key'],
+                        'summary' => $one['fields']['summary'],
+                        'description' => $one['fields']['description'],
+                    ];
+                }
+            }
 
             $all_keys = [];
             $all_text = '';
