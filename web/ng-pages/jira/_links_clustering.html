@@ -1,0 +1,19 @@
+<div ng-if="self.selectedDoneFilter == 'LC'">
+
+    <issue-as-table 
+        issue-key-list="self.resultLC[0].items" 
+        active="self.activeIssueKey" 
+        title="Без посилань:" 
+        loadQuality="false">
+    </issue-as-table>
+
+    <div ng-repeat="(ci, cluster) in self.resultLC" ng-if="ci!=0">
+        <issue-as-table 
+            issue-key-list="cluster.items" 
+            active="self.activeIssueKey" 
+            title="{{cluster.url}}" 
+            loadQuality="false">
+        </issue-as-table>
+    </div>
+
+</div>

@@ -214,7 +214,7 @@ class FullApiController extends \yii\web\Controller {
         if (\Yii::$app->request->isPost) {
             $post = \Yii::$app->request->post();
 
-            $issues = $post['issue_arr'];
+            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [] ;
             $provider = JiraProvider::getInstance();
 
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);

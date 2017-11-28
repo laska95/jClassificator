@@ -134,7 +134,6 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         {
             key: 'LC', //DecisionApiLinksClusteringCtrl
             label: 'Кластиризація за спільними ресурсами',
-            url: '/decision/full-api/links-clustering'
         },
         {
             key: 'TC', //DecisionApiLinksClusteringCtrl
@@ -209,7 +208,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     };
     
     var lcApply = function () {
-        var url = '/decision/full-api/availability-description';
+        var url = '/decision/full-api/links-clustering';
 
         var issue_keys = [];
         angular.forEach(self.issueList, function (one) {
@@ -228,8 +227,8 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             dataType: 'json'
         }).done(function (data) {
             console.log(data);
-            self.resultAD = data;
-            self.selectedDoneFilter = 'AD';
+            self.resultLC = data;
+            self.selectedDoneFilter = 'LC';
             $timeout(function () {
                 $scope.$apply();
             });
