@@ -189,58 +189,30 @@ class Decision {
     public static function clustering($w) {
 
         $full_graph = self::fullGraph($w);
-//        return $full_graph;
         $tree = self::tree_prime($full_graph, $w);
 
-        var_dump($tree);
         $clusters = self::getClusters($tree);
         $ww = self::fullGraph($w);
         $F0 = self::getTestF($w);
         for ($i = 0; $i < count($ww)/2; $i++) {
             $is_ok = true;
-var_dump('-------------------------------------');
             foreach ($clusters as $one) {
                 
                 $F = self::getF($one, $w, $ww, $tree);
-                var_dump($F);
                 if ($F < $F0) {
                     $is_ok = FALSE;
-//                    break;
                 }
             }
 
             if (!$is_ok) {
                 $tree = self::divTree($tree, $one, $F0, $w, $ww);
                 $clusters = self::getClusters($tree);
-                var_dump($clusters);
             } else {
                 break;
             }
         }
 
-//        return $tree;
-        die();
-//        
-//        $F = self::getF($clusters, $w, $ww);
-//        
-//        var_dump($F0, $F);
-//        die();
-//        $max = self::max2($tree);
-//        foreach ($tree as $key1 => $w1){
-//            foreach ($w1 as $key2 => $v){
-//                if ($v == $max){
-//                    unset($tree[$key1][$key2]);
-//                    unset($tree[$key2][$key1]);
-//                    $clusters = self::getClusters($tree);
-//                    break(2);
-//                }
-//            }
-//        }
-//       $F0 = self::getTestF($w);
-//       $F = self::getF($clusters, $w, $ww);
-//        var_dump($F0, $F);
-//        die();
-        return $tree;
+        return $clusters;
     }
 
     private static function divTree($tree, $cluster) {

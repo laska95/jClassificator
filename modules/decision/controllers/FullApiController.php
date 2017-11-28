@@ -236,7 +236,7 @@ class FullApiController extends \yii\web\Controller {
 
             $issues = $post['issue_arr'];
             
-            $f5_keys = [];
+            $all_keys = [];
             $all_text = '';
             
             foreach ($issues as $one){
@@ -244,14 +244,14 @@ class FullApiController extends \yii\web\Controller {
                 $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
                 $t1 = $one['description'];
                 $t0 .= ' ' . $t1;
-                
+
                 $t1 = preg_replace('#\W#u', ' ', $t0);
                 $t1 = preg_replace('#( {2,})#u', ' ', $t1);
                 
                 $f5_one = \app\modules\decision\models\FrequencyLang::canculateFrequency($t1, 5);
                 asort($f5_one); 
                 $f5_one = array_slice($f5_one, 0.32 * count($f5_one), 0.68 * count($f5_one));
-                $f5_keys = array_merge($f5_keys, array_keys($f5_one));
+                $all_keys = array_merge($all_keys, array_keys($f5_one));
 
                 $all_text .= $t1;
             }
@@ -261,7 +261,7 @@ class FullApiController extends \yii\web\Controller {
                 $w[$one['key']] = [];
                 $t0 = $one['summary'] . ' ' .$one['summary'] .' '. $one['summary'];
                 $one_text = $t0 . ' '. $one['description'];
-                foreach ($f5_keys as $f_code){
+                foreach ($all_keys as $f_code){
                     $n = preg_match_all("#{$f_code}#", $one_text);
                     $w[$one['key']][$f_code] = $n;
                 }
