@@ -48,11 +48,9 @@ class FullApiController extends \yii\web\Controller {
             }
 
             $issues_description = [];
-
+            
             //задачі описані вручну
-            foreach ($post['issue_arr'] as $one_issue) {
-                $issues_description[] = $one_issue['description'];
-            }
+            $issues_description[] = $post['text'] ?? '';
 
             //задачі задані як масив ключів
 

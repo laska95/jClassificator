@@ -38,6 +38,8 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
 
     public static function createNew($text, $project_id) {
   
+        $ret = [];
+        
         foreach ([1] as $n){
             $fr = self::canculateFrequency($text, $n);
               
@@ -65,6 +67,8 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
                 $m->frequency = $f;
                 $m->project_id = $project_id;
                 $m->save();
+                
+                $ret[$c] = $f;
             }
 
         }
@@ -72,7 +76,8 @@ class FrequencyProjectLang extends \yii\db\ActiveRecord {
         $new_fr  = self::find()->where([
                 'project_id' => $project_id ?? 0,
             ])->asArray()->all();
-        return \yii\helpers\ArrayHelper::map($new_fr, 'code', 'frequency') ?? [];
+        $ret = (!empty($new_fr)) ? \yii\helpers\ArrayHelper::map($new_fr, 'code', 'frequency') : $ret;
+        return $ret;
     }
 
     public static function getFrequencyLangN($project_code, $user = NULL, $n = [1, 5, 7]) {
