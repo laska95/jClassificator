@@ -84,7 +84,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         var filter_fnc = function (one_issue, one_key) {
             return (one_issue.key == key);
         };
-        var finds = self.issueList.filter(filter_fnc);
+        var finds = self.issueList.issues(filter_fnc);
         return finds[0]; //issue or undefined
     };
 
@@ -116,7 +116,10 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     });
 
     self.selectedFilter = 'AD';
+    self.selectedFilter1 = 'AD';
+    self.selectedFilter2 = 'AD';
     self.selectedDoneFilter = '';
+    self.olapApply = true;
 
     self.resultAD = {};
     self.resultPC = {};
@@ -150,9 +153,20 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         } else if (self.selectedFilter === 'LC') {
             lcApply();
         } else if (self.selectedFilter === 'TC') {
-             tcApply();
+            tcApply();
         }
 
+    };
+    
+    self.olapTriger = true;
+    self.olapParams = [];
+    self.applyFilter2 = function () {
+        var issue_keys = [];
+        angular.forEach(self.issueList, function (one) {
+            issue_keys.push(one.key);
+        });
+        self.olapParams = issue_keys;
+        self.olapTriger = !self.olapTriger;
     };
 
     var adApply = function () {

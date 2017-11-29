@@ -12,10 +12,6 @@ agile.directive('issueAsTable', function () {
         },
 
         controller: function ($scope, $element, $attrs, $location, $timeout) {
-            console.log('Hello');
-            console.log($scope.issueKeyList);
-            console.log($scope.issue_key_list);
-            console.log($scope.title);
 
             $scope.ifActiveIssue = function () {
                 return (typeof $scope.active !== 'undefined');

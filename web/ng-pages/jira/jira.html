@@ -56,6 +56,16 @@
                 <div ng-include="'ng-pages/jira/_text_clustering.html'">
                 </div>
             </div>
+            <div >
+                <olap-cube 
+                    xcode="self.selectedFilter1"
+                    ycode="self.selectedFilter2"
+                    apply="self.olapTriger"
+                    issues="self.olapParams">
+                    
+                </olap-cube>
+            </div>
+            
         </div>
 
 

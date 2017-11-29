@@ -19,14 +19,27 @@
             
 
         </div>
-
-
-
-
     </div>
+    
     <div id="menu1" class="tab-pane fade">
-        <h3>Menu 1</h3>
-        <p>Some content in menu 1.</p>
+       <div class="control-group form-inline">
+            <p>Виберіть способи кластиризації:</p>
+            <div class="form-group">
+                
+                <dropdown-select ng-model="self.selectedFilter1" key="key" title="label" items="self.filterList">  
+                </dropdown-select>
+            </div>
+            <div class="form-group">
+                
+                <dropdown-select ng-model="self.selectedFilter2" key="key" title="label" items="self.filterList">  
+                </dropdown-select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary" ng-click="self.applyFilter2()">Застосувати</button>
+            </div>
+            
+
+        </div>
     </div>
     <div id="menu2" class="tab-pane fade">
         <h3>Menu 2</h3>
