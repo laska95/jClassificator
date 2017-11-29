@@ -146,6 +146,22 @@ agile.directive('olapCube', function ($q) {
                 });
             });
 
+            $scope.isCross = function (elem, arr){
+                var i = arr.indexOf(elem);
+                return (i > -1)? true : false;
+            };
+            
+            $scope.isHasCross = function (x_elem, y_elem){
+                var ret = false;
+                angular.forEach(x_elem.items, function (one_x){
+                    var i = y_elem.items.indexOf(one_x);
+                    if (i > -1){
+                        ret = true;
+                    }
+                });
+                return ret;
+            };
+
         }
     };
 });

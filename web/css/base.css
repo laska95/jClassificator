@@ -56,3 +56,62 @@
     position: fixed;
     right: 30px;
 }
+
+.olap-content{
+    border: 1px solid #000080;
+    padding: 5px;
+}
+
+.olap-table{
+    margin-top: 20px;
+}
+
+.olap-table table, th, td{
+
+    border: 1px solid black;
+
+}
+
+.olap-table tr td:first-child{
+    max-width: 100px;
+}
+
+.olap-table td:last-of-type{
+    padding: 5px;
+}
+
+.olap-y-label{
+    max-width: 150px;
+}
+
+.olap-x-label{
+        writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+.olap-cube .olap-row:last-of-type{
+    margin-bottom: 0px;
+}
+
+.olap-row {
+    border: 1px solid #b81900;
+
+    display: flex;
+    flex-direction: row;
+    justify-content:space-around;
+    align-items:stretch;
+}
+
+.olap-call {
+    max-height: 200px; 
+    overflow-y: scroll;
+    padding: 5px;
+    margin: 5px;
+}
+
+.olap-call-title{
+
+     max-height: 200px; 
+     padding: 5px;
+     font-weight: bold;
+     margin: 5px;
+}

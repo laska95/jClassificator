@@ -1,14 +1,37 @@
 <div>
-
-<br>
-
-    <br>
-    {{xData}}
+   
+    <section class="olap-table">
+        <table>
+            <tr ng-repeat="one_y in yData">
+                <td>
+                    <div class="olap-call-title olap-y-label">
+                        {{one_y.label}}
+                    </div>
+                </td>
+                <td ng-repeat="one_x in xData">
+                    <div class="olap-call" ng-if="isHasCross(one_x, one_y)">
+                        
+                        <div ng-repeat="one_item in one_x.items" ng-if="isCross(one_item, one_y.items)">
+                            {{one_item}}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    
+                </td>
+                <td ng-repeat="one_x in xData">
+                    <div class="olap-call-title olap-x-label">
+                        {{one_x.label}}
+                    </div>
+                    
+                </td>
+            </tr>
+        </table>
+    </section>
     
     
-    <br>
-    
-    {{yData}}
     
     
 </div>
