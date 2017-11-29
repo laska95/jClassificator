@@ -3,12 +3,17 @@
     <p>
         Метод групує задачі за спільними посиланнями, які вказані в описі задачі
     </p>
-    
+
     <div class="container">
-        
+
         <h4><span>(POST)</span></h4>
         <p>URL: self.url</p>
-        
+
+        <div class="form-group">
+            <p>JQL запит:</p>
+            <input class="form-control" ng-model="self.post_params.jql">
+        </div>
+
         <p>Ключі задач:</p>
         <div class="row">
 
@@ -24,48 +29,46 @@
             </div>
 
         </div>
-        
+
         <p>Масив описаних задач:</p>
         <div class="row">
 
             <div class="col-sm-4 conteiner" ng-repeat="(key, issue) in self.post_params.issue_arr">
-                <p>Задача {{key}}:</p>
                 <div class='form-group'>
-                <div class="form-group">
-                    <p>Ключ:</p>
-                    <textarea class="form-control" ng-model="issue.key"></textarea>
-                </div>
-                <div class="form-group">
-                    <p>Опис:</p>
-                    <textarea class="form-control" ng-model="issue.description"></textarea>
-                </div>
+                    <div class="form-group">
+                        <p>Ключ:</p>
+                        <textarea class="form-control" ng-model="issue.key"></textarea>
                     </div>
+                    <div class="form-group">
+                        <p>Опис:</p>
+                        <textarea class="form-control" ng-model="issue.description"></textarea>
+                    </div>
+                </div>
+
+
+                <div class="col-sm-4">
+                    <button>Додати задачу</button>
+                </div>
+
             </div>
 
-
-            <div class="col-sm-4">
-                <button>Додати задачу</button>
+            <div class="row container">
+                <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
             </div>
 
-        </div>
+            <div>
+                <div class="form-group">
+                    <p>Параметри запиту:</p>
+                    <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+                </div>
+            </div>
 
-        <div class="row container">
-            <button class="btn btn-primary pull-right" ng-click="self.post_subbmit()">Відправити запит</button>
-        </div>
-        
-        <div>
             <div class="form-group">
-                <p>Параметри запиту:</p>
-                <textarea class="form-control" ng-model="self.post_params_json"></textarea>
+                <p>Результат:</p>  
+                <textarea class="form-control" ng-model="self.post_response_json"></textarea>
             </div>
+
         </div>
-        
-        <div class="form-group">
-            <p>Результат:</p>  
-            <textarea class="form-control" ng-model="self.post_response_json"></textarea>
-        </div>
-        
+
+
     </div>
-    
-    
-</div>

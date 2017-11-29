@@ -48,7 +48,7 @@ class FullApiController extends \yii\web\Controller {
             }
 
             $issues_description = [];
-            
+
             //задачі описані вручну
             $issues_description[] = $post['text'] ?? '';
 
@@ -154,11 +154,11 @@ class FullApiController extends \yii\web\Controller {
                     'items' => []
                 ]
             ];
-            
-            foreach ($ret as $issue_key => $val){
+
+            foreach ($ret as $issue_key => $val) {
                 $ret0[$val['value']]['items'][] = $issue_key;
             }
-            
+
             return $ret0;
         }
     }
@@ -172,18 +172,21 @@ class FullApiController extends \yii\web\Controller {
             $priorityList = $provider->getIssuePriority()->getResponse();
             foreach ($priorityList as $one) {
                 $ret[$one['id']] = [
-                    'class' => $one,
+                    'class' => [
+                        'id' => $one['id'],
+                        'label' => $this->getPriorityLabel($one['id'])
+                    ],
                     'items' => []
                 ];
             }
 
-            if (isset($post['issue_arr'])){
+            if (isset($post['issue_arr'])) {
                 foreach ($post['issue_arr'] as $one) {
                     $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one);
                     $ret[$c]['items'][] = $one['key'];
                 }
             }
-            
+
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
             $jiraIssues = $provider->getIssueList($jql, ['duedate', 'timetracking', 'priority']);
             if (isset($jiraIssues->getResponse()['issues'])) {
@@ -207,11 +210,27 @@ class FullApiController extends \yii\web\Controller {
         }
     }
 
+    private function getPriorityLabel($pi) {
+        if ($pi == '1') {
+            return "Дуже високий, блокуючий";
+        } elseif ($pi == '2') {
+            return "Високий";
+        } elseif ($pi == '3') {
+            return "Нормальний";
+        } elseif ($pi == '4') {
+            return "Низький";
+        } elseif ($pi == '5') {
+            return "Дуже низький";
+        } else {
+            return '---';
+        }
+    }
+
     public function actionLinksClustering() {
         if (\Yii::$app->request->isPost) {
             $post = \Yii::$app->request->post();
 
-            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [] ;
+            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
             $provider = JiraProvider::getInstance();
 
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
@@ -226,11 +245,23 @@ class FullApiController extends \yii\web\Controller {
             }
 
             $urls = \app\modules\decision\helpers\Decision::getAllLinks($issues);
-            $ret = ['0' => ['url' => null, 'items' => []]];
+            $ret = [];
+            $ret[] = [
+                'class' => [
+                    'url' => null,
+                    'label' => '(без посилань)'
+                ],
+                'items' => []
+            ];
 
             foreach ($urls as $u) {
+                $l = '';
+                preg_match('(https?:\/\/([\w\.-]+\/?))', $u, $l);
                 $ret[] = [
-                    'url' => $u,
+                    'class' => [
+                        'url' => $u,
+                        'label' => $l[0] ?? '---'
+                    ],
                     'items' => []
                 ];
             }
@@ -245,7 +276,7 @@ class FullApiController extends \yii\web\Controller {
                         continue;
                     }
 
-                    $n = preg_match('#(' . preg_quote($ret_one['url']) . ')#', $one['description']);
+                    $n = preg_match('#(' . preg_quote($ret_one['class']['url']) . ')#', $one['description']);
                     if ($n) {
                         $ret[$i]['items'][] = $one['key'];
                         $set = TRUE;
@@ -267,7 +298,7 @@ class FullApiController extends \yii\web\Controller {
 
             $post = \Yii::$app->request->post();
 
-            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [] ;
+            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
             $provider = JiraProvider::getInstance();
 
             $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);

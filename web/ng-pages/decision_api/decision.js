@@ -227,6 +227,7 @@ function DecisionApiPriorityClusteringCtrl($scope, $route, $http, $timeout, Jira
                 remainingEstimateSeconds: -300,
             }
         },
+        jql: "project in ('PR-2', 'PR-5')",
         issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
     };
     self.post_params_json = '';
@@ -276,6 +277,7 @@ function DecisionApiLinksClusteringCtrl($scope, $route, $http, $timeout){
             }
         },
         issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
+        jql: "project in ('PR-2', 'PR-5')",
     };
     self.post_params_json = '';
     
