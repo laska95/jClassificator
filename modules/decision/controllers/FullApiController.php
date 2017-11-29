@@ -88,7 +88,7 @@ class FullApiController extends \yii\web\Controller {
 
             $issues = $post['issue_arr'];
             foreach ($issues as $one) {
-                $ret[] = \app\modules\decision\helpers\Decision::textQuality(
+                $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
                                 $one['description'], $lang, $prj, $this->_user);
             }
 

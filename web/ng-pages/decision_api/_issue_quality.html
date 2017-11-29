@@ -12,6 +12,11 @@
         <h4><span>(POST)</span></h4>
         <p>URL: <span>http://agile.loc/decision/full-api/text-quality</span></p>
         
+        <div class="form-group">
+            <p>JQL запит:</p>
+            <input class="form-control" ng-model="self.post_params.jql">
+        </div>
+        
         <p>Ключі задач:</p>
         <div class="row">
 
@@ -31,9 +36,13 @@
         <p>Масив описаних задач:</p>
         <div class="row">
 
-            <div class="col-sm-4" ng-repeat="(key, issue) in self.post_params.issue_arr">
+            <div class="col-sm-4" ng-repeat="issue in self.post_params.issue_arr">
                 <div class="form-group">
-                    <p>Задача {{key}}:</p>
+                    <p>Ключ задачі</p>
+                    <input class="form-control" ng-model="issue.key">
+                </div>
+                <div class="form-group">
+                    <p>Опис задачі:</p>
                     <textarea class="form-control" ng-model="issue.description"></textarea>
                 </div>
             </div>

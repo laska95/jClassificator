@@ -93,12 +93,15 @@ function DecisionApiIssueQualityCtrl($scope, $route, $http, $timeout){
     self.post_params = {
         issue_arr: {
             1: {
+                key: 'PR-10',
                 description: 'Ознайомитися з API',
             },
             2: {
-                description: '',
+                key: 'PR-11',
+                description: 'gf hgf hgf hv j jbbbbbvv hg',
             }
         },
+        jql: "project in ('PR-2', 'PR-5')",
         issue_key_arr: ['PR-8', ''],
         lang_code: 'ua-UA',
         project_code: ''
