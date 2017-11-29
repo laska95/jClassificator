@@ -103,8 +103,7 @@ class FullApiController extends \yii\web\Controller {
             $issues = [];
             if (isset($post['issue_arr'])) {
                 foreach ($post['issue_arr'] as $key => $one) {
-                    $one['key'] = $key;
-                    $issues[$key] = $one;
+                    $issues[$one['key']] = $one;
                 }
             }
             $provider = JiraProvider::getInstance();

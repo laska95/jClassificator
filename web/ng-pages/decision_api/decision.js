@@ -154,6 +154,7 @@ function DecisionApiAvailabilityDescriptionCtrl($scope, $route, $http, $timeout)
                 summary: 'Задача 2'
             }
         },
+        jql: "project in ('PR-2', 'PR-5')",
         issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
 
     };
