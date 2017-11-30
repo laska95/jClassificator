@@ -344,7 +344,19 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            return \app\modules\decision\helpers\Decision::clustering($w);
+            $r0 = \app\modules\decision\helpers\Decision::clustering($w);
+            $ret = [];
+            
+            foreach ($r0 as $i => $r_one){
+                $ret[] = [
+                    'class' => [
+                        'id' => $i
+                    ],
+                    'items' => $r_one
+                ];
+            }
+            
+            return $ret;
         }
     }
 
