@@ -390,7 +390,7 @@ class FullApiController extends \yii\web\Controller {
             $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
             if ($issue_key_arr) {
                 $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 100);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
                 if (isset($jiraIssues->getResponse()['issues'])) {
                     foreach ($jiraIssues->getResponse()['issues'] as $one) {
                         $issues[] = [
@@ -401,10 +401,10 @@ class FullApiController extends \yii\web\Controller {
                     }
                 }
             }
-            
-            if ($post['jql']) {
+
+            if (isset($post['jql'])) {
                 $jql = $post['jql'];
-                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 100);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
                 if (isset($jiraIssues->getResponse()['issues'])) {
                     foreach ($jiraIssues->getResponse()['issues'] as $one) {
                         $issues[] = [
@@ -420,35 +420,72 @@ class FullApiController extends \yii\web\Controller {
             $all_keys = [];
             $all_text = '';
 
+            $all_keys = Decision::getKeyWords($issues);
+            $clean_issues = [];
+            $w = [];
+                        
             foreach ($issues as $one) {
-                $f_one = [];
-                $t0 = $one['summary'] . ' ' . $one['summary'] . ' ' . $one['summary'];
-                $t1 = $one['description'];
-                $t0 .= ' ' . $t1;
+                $title = $one['summary'];
+                $title = preg_replace('#\W#u', ' ', $title);
+                $title = preg_replace('#( {2,})#u', ' ', $title);
 
-                $t1 = preg_replace('#\W#u', ' ', $t0);
-                $t1 = preg_replace('#( {2,})#u', ' ', $t1);
+                $text = $one['description'];
+                $text = preg_replace('#\W#u', ' ', $text);
+                $text = preg_replace('#( {2,})#u', ' ', $text);
 
-                $f5_one = \app\modules\decision\models\FrequencyLang::canculateFrequency($t1, 5);
-                asort($f5_one);
-                $f5_one = array_slice($f5_one, 0.32 * count($f5_one), 0.68 * count($f5_one));
-                $all_keys = array_merge($all_keys, array_keys($f5_one));
-
-                $all_text .= $t1;
+                $all_text .= ' ' . $title . ' ' . $text;
+                $clean_issues[$one['key']] = $title . ' ' . $title . ' ' . $title . ' ' . $text;
             }
 
-            $w = [];
-            foreach ($issues as $one) {
-                $w[$one['key']] = [];
-                $t0 = $one['summary'] . ' ' . $one['summary'] . ' ' . $one['summary'];
-                $one_text = $t0 . ' ' . $one['description'];
-                foreach ($all_keys as $f_code) {
-                    $n = preg_match_all("#{$f_code}#", $one_text);
-                    $w[$one['key']][$f_code] = $n;
+            foreach ($clean_issues as $issue_key => $issue_text) {
+                $w[$issue_key] = [];
+                foreach ($all_keys as $key_kode) {
+                    $n = preg_match_all("#{$key_kode}#", $issue_text);
+                    $w[$issue_key][$key_kode] = $n;
                 }
             }
 
-            $r0 = \app\modules\decision\helpers\Decision::clustering($w);
+            $d_max = [];
+            $d_sum = [];
+            $d_dif = [];
+            foreach ($w as $issue_key => $old_w){
+                foreach ($old_w as $i => $n){
+                    
+                    if (!isset($d_max[$i])){
+                        $d_max[$i] = $n;
+                        $d_sum[$i] = $n;
+                    } else {
+                        if ($d_max[$i] < $n){
+                            $d_max[$i] = $n;
+                        }
+                        $d_max[$i]+= $n;
+                    }
+                }
+            }
+
+            foreach ($d_max as $i => $val){
+                $d_dif[$i] = $val - $d_sum[$i]/count($w);
+            }
+                        
+            //нормалізація координат
+            foreach ($w as $issue_key => $old_w){
+                foreach ($old_w as $i => $n){
+                    $w[$issue_key][$i] = ($d_max[$i])? ($n * 100 / $d_max[$i]) : 0;
+                }
+            }
+            
+            //видалення не значущих координат
+            $d_dif_max = max($d_dif);
+            foreach ($d_max as $i => $v){
+                if ($v < 0.32*$d_dif_max || $v > 0.68*$d_dif_max){
+                    foreach ($w as $issue_key => $old_w){
+                        unset($w[$issue_key][$i]);
+                    }
+                }
+                
+            }
+            
+            $r0 = Decision::clustering($w);
             $ret = [];
 
             foreach ($r0 as $i => $r_one) {

@@ -186,13 +186,15 @@ class Decision {
      * @return array масив з кластерами
      */
     public static function clustering($w) {
-ini_set('memory_limit', '1000M');
+ini_set('memory_limit', '1200M');
         $full_graph = self::fullGraph($w);
-        $tree = self::tree_prime($full_graph, $w);
-
+        $tree = self::tree_prime($full_graph, $w);       
+        
         $clusters = self::getClusters($tree);
+      
         $ww = self::fullGraph($w);
         $F0 = self::getTestF($w);
+                
         for ($i = 0; $i < count($ww)/2; $i++) {
             $is_ok = true;
             foreach ($clusters as $one) {
@@ -242,50 +244,53 @@ ini_set('memory_limit', '1000M');
 
     private static function getClusters($tree) {
         $clusters = [];
-
+        
         foreach ($tree as $key1 => $w1) {
-            $g = [$key1];
-
+            //масив зв'язаних вершин
+            $key_group = [$key1];
+            
             foreach ($w1 as $key2 => $v) {
                 if ($v > 0) {
-                    $g[] = $key2;
+                    $key_group[] = $key2;
                 }
             }
-
+            
             $ci = [];
-            foreach ($g as $gkey) {
-                $gi_arr = self::getClusterIndexs($clusters, $gkey);
+            foreach ($key_group as $one_key) {
+                $gi_arr = self::getClusterIndexs($clusters, $one_key);
                 foreach ($gi_arr as $one_g){
                     $ci[] = $one_g;
                 }
             }
-
-
-            if (empty($ci)) {
-                //new cluster
-                $clusters[] = $g;
+            
+            if (empty($ci)){
+                $clusters[] = $key_group;
             } elseif (count($ci) == 1) {
-                //old cluster
+                //one old cluster
                 $ci = $ci[0];
-                $clusters[$ci] = array_merge($clusters[$ci], $g);
+                $clusters[$ci] = array_unique(array_merge($clusters[$ci], $key_group));
             } else {
+                $marge_cluster = $key_group;
                 foreach ($ci as  $c){
-                    $g = array_merge($g, $clusters[$c]); 
+                    foreach ($clusters[$c] as $one_val){
+                        $marge_cluster[] = $one_val;
+                    }
                 }
                 
                 foreach ($ci as  $c){
                     unset($clusters[$c]);
                 }
                 
-                 $clusters[] = $g;
+                $clusters[] = array_unique($marge_cluster);
             }
             
+            
         }
-
+        
         foreach ($clusters as $ci => $one) {
             $clusters[$ci] = array_unique($one);
         }
-
+        
         return $clusters;
     }
 
@@ -436,4 +441,41 @@ ini_set('memory_limit', '1000M');
         return min($all);
     }
 
+    public static function getKeyWords($issues){
+        $issue_keys = [];
+        $text_keys = [];
+        
+        $all_text = '';
+        
+        foreach ($issues as $one_issue){
+            //ключові слова із заголовка
+            $title = $one_issue['summary'];
+            $title = preg_replace('#\W#u', ' ', $title);
+            $title = preg_replace('#( {2,})#u', ' ', $title);
+            
+            $title_keys = \app\modules\decision\models\FrequencyLang::canculateFrequency($title, 5);
+            
+            foreach ($title_keys as $key => $f){
+                $issue_keys[] = $key;
+            }
+            
+            //ключові слова із тексту
+            $text = $one_issue['description'];
+            $text = preg_replace('#\W#u', ' ', $text);
+            $text = preg_replace('#( {2,})#u', ' ', $text);
+            
+            $f5_text = \app\modules\decision\models\FrequencyLang::canculateFrequency($text, 5);
+            $text_keys = [];
+            foreach ($f5_text as $key => $f_one){
+                 $issue_keys[] = $key;
+            }
+            
+        }
+        
+        $issue_keys = array_unique($issue_keys);
+        return $issue_keys;
+//        var_dump($issue_keys);
+//        die();
+    }
+    
 }

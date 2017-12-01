@@ -27,7 +27,7 @@ agile.directive('issueAsTable', function () {
                 }
             };
               
-            $scope.count = (typeof $scope.issueKeyList === 'object') ?  $scope.issueKeyList.length : 0;
+            $scope.count = (typeof $scope.issueKeyList === 'object') ?  Object.keys($scope.issueKeyList).length : 0;
 
         },
 

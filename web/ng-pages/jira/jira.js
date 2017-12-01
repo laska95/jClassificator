@@ -123,11 +123,11 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     getIssueStatusList();
     getIssueTypeList();
 
-     self.jql = '';
+    self.jql = '';
 
     $scope.$watch(function () {
-        return JSON.stringify(self.selectedIssueStatusList) 
-                + JSON.stringify(self.selectedIssueTypeList) 
+        return JSON.stringify(self.selectedIssueStatusList)
+                + JSON.stringify(self.selectedIssueTypeList)
                 + self.selectProject;
     }, function (new_value) {
         //завантажуємо список задач згідно фільтру
@@ -137,7 +137,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
                 'status': self.selectedIssueStatusList
             };
             getIssueList(params);
-             self.jql = getJQL();
+            self.jql = getJQL();
         }
 
     });
@@ -355,7 +355,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     self.getTotalRet = function (ret) {
         var total = 0;
         angular.forEach(ret, function (one) {
-            total += one.items.length;
+            total += Object.keys(one.items).length;
         });
         return total;
     };
