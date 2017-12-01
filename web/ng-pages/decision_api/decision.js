@@ -102,7 +102,7 @@ function DecisionApiIssueQualityCtrl($scope, $route, $http, $timeout){
             }
         },
         jql: "project in ('PR-2', 'PR-5')",
-        issue_key_arr: ['PR-8', ''],
+        issue_key_arr: ['BANNERTYPE-27', ''],
         lang_code: 'ua-UA',
         project_code: ''
     };

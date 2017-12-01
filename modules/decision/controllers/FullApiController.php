@@ -66,6 +66,17 @@ class FullApiController extends \yii\web\Controller {
                     $issues_description[] = $one['fields']['description'];
                 }
             }
+
+
+            //JQL
+            $jql = $post['jql'];
+            $issues = $provider->getIssueList($jql, ['description']);
+            if (isset($issues->getResponse()['issues'])) {
+                foreach ($issues->getResponse()['issues'] as $one) {
+                    $issues_description[] = $one['fields']['description'];
+                }
+            }
+
             $text = '';
             foreach ($issues_description as $one) {
                 //видаляємо посилання
@@ -90,6 +101,30 @@ class FullApiController extends \yii\web\Controller {
             foreach ($issues as $one) {
                 $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
                                 $one['description'], $lang, $prj, $this->_user);
+            }
+            $provider = JiraProvider::getInstance();
+            $issue_key_arr = array_filter($post['issue_key_arr']);
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $issue_key_arr]);
+                $issues = $provider->getIssueList($jql, ['description']);
+                if (isset($issues->getResponse()['issues'])) {
+                    foreach ($issues->getResponse()['issues'] as $one) {
+                        $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
+                                        $one['fields']['description'], $lang, $prj, $this->_user);
+                    }
+                }
+            }
+
+            //JQL
+            if ($post['jql']) {
+                $jql = $post['jql'];
+                $issues = $provider->getIssueList($jql, ['description']);
+                if (isset($issues->getResponse()['issues'])) {
+                    foreach ($issues->getResponse()['issues'] as $one) {
+                        $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
+                                        $one['fields']['description'], $lang, $prj, $this->_user);
+                    }
+                }
             }
 
             return $ret;
@@ -346,8 +381,8 @@ class FullApiController extends \yii\web\Controller {
 
             $r0 = \app\modules\decision\helpers\Decision::clustering($w);
             $ret = [];
-            
-            foreach ($r0 as $i => $r_one){
+
+            foreach ($r0 as $i => $r_one) {
                 $ret[] = [
                     'class' => [
                         'id' => $i
@@ -355,7 +390,7 @@ class FullApiController extends \yii\web\Controller {
                     'items' => $r_one
                 ];
             }
-            
+
             return $ret;
         }
     }

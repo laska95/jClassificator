@@ -173,7 +173,6 @@ class JiraProvider {
             'maxResults' => $maxResults,
             'fields' => $fields,
         ];
-                
         $ch = $this->getBaseCurl('/rest/api/2/search', [], 'POST', $post);
         $ret = new FullResponse($ch);
         curl_close($ch);
