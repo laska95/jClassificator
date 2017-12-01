@@ -12,7 +12,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     self.lang_code = 'project';
     self.issueStatusList = [];
     self.selectedIssueStatusList = [];
-    
+
     self.issueTypeList = [];
     self.selectedIssueTypeList = [];
 
@@ -72,7 +72,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
-    
+
     var getIssueTypeList = function () {
         var p = issueTypeService.getAll();
         p.then(function (data) {
@@ -123,8 +123,12 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     getIssueStatusList();
     getIssueTypeList();
 
+     self.jql = '';
+
     $scope.$watch(function () {
-        return JSON.stringify(self.selectedIssueStatusList) + self.selectProject;
+        return JSON.stringify(self.selectedIssueStatusList) 
+                + JSON.stringify(self.selectedIssueTypeList) 
+                + self.selectProject;
     }, function (new_value) {
         //завантажуємо список задач згідно фільтру
         if (self.selectProject) {
@@ -133,6 +137,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
                 'status': self.selectedIssueStatusList
             };
             getIssueList(params);
+             self.jql = getJQL();
         }
 
     });
@@ -202,6 +207,27 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         self.selectedDoneFilter = 'OLAP';
     };
 
+    var getJQL = function () {
+        var jql = '(project="' + self.selectProject + '")';
+
+        if (self.selectedIssueStatusList.length > 0) {
+            var statusArr = [];
+            angular.forEach(self.selectedIssueStatusList, function (one_status) {
+                statusArr.push('"' + one_status + '"');
+            });
+            jql += 'AND (status IN (' + statusArr.join() + '))';
+        }
+
+        if (self.selectedIssueTypeList.length > 0) {
+            var typeArr = [];
+            angular.forEach(self.selectedIssueTypeList, function (one_status) {
+                typeArr.push('"' + one_status + '"');
+            });
+            jql += 'AND (issuetype IN (' + typeArr.join() + '))';
+        }
+        return jql;
+    };
+
     var adApply = function () {
         var url = '/decision/full-api/availability-description';
 
@@ -212,7 +238,10 @@ function JiraController($scope, $route, $http, $timeout, projectService,
 
         var post = {
             issue_arr: {},
-            issue_key_arr: issue_keys,
+//            issue_key_arr: issue_keys,
+            jql: self.jql,
+            lang_code: self.lang_code,
+            project_code: self.selectProject
         };
 
         $.ajax({
@@ -239,7 +268,10 @@ function JiraController($scope, $route, $http, $timeout, projectService,
 
         var post = {
             issue_arr: {},
-            issue_key_arr: issue_keys,
+//            issue_key_arr: issue_keys,
+            jql: self.jql,
+            lang_code: self.lang_code,
+            project_code: self.selectProject
         };
 
         $.ajax({
@@ -266,17 +298,23 @@ function JiraController($scope, $route, $http, $timeout, projectService,
 
         var post = {
             issue_arr: {},
-            issue_key_arr: issue_keys,
+//            issue_key_arr: issue_keys,
+            jql: self.jql,
+            lang_code: self.lang_code,
+            project_code: self.selectProject
         };
 
         $.ajax({
             type: 'POST',
             url: url,
             data: post,
-            dataType: 'json'
+            dataType: 'json',
+            lang_code: self.lang_code,
+            project_code: self.selectProject
         }).done(function (data) {
             self.resultLC = data;
             self.selectedDoneFilter = 'LC';
+
             $timeout(function () {
                 $scope.$apply();
             });
@@ -293,7 +331,10 @@ function JiraController($scope, $route, $http, $timeout, projectService,
 
         var post = {
             issue_arr: {},
-            issue_key_arr: issue_keys,
+//            issue_key_arr: issue_keys,
+            lang_code: self.lang_code,
+            jql: self.jql,
+            project_code: self.selectProject
         };
 
         $.ajax({
@@ -310,11 +351,11 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
-    
-    self.getTotalRet = function (ret){
+
+    self.getTotalRet = function (ret) {
         var total = 0;
-        angular.forEach(ret, function (one){
-           total += one.items.length; 
+        angular.forEach(ret, function (one) {
+            total += one.items.length;
         });
         return total;
     };

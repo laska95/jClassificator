@@ -101,7 +101,7 @@ function DecisionApiIssueQualityCtrl($scope, $route, $http, $timeout){
                 description: 'gf hgf hgf hv j jbbbbbvv hg',
             }
         },
-        jql: "project in ('PR-2', 'PR-5')",
+        jql: "project=\"BANNERTYPE\"",
         issue_key_arr: ['BANNERTYPE-27', ''],
         lang_code: 'ua-UA',
         project_code: ''
@@ -154,9 +154,10 @@ function DecisionApiAvailabilityDescriptionCtrl($scope, $route, $http, $timeout)
                 summary: 'Задача 2'
             }
         },
-        jql: "project in ('PR-2', 'PR-5')",
+        jql: "project=\"BANNERTYPE\"",
         issue_key_arr: ['BRAIN-2065', 'BRAIN-2068'],
-
+        lang_code: 'ua-UA',
+        project_code: ''
     };
     self.post_params_json = '';
     

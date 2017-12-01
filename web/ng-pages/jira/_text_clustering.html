@@ -1,7 +1,7 @@
 <div ng-if="self.selectedDoneFilter == 'TC'">
     <div ng-repeat="(ci, cluster) in self.resultTC"">
         <issue-as-table 
-            issue-key-list="cluster" 
+            issue-key-list="cluster.items" 
             active="self.activeIssueKey" 
             title="Кластер №{{ci}}" 
             loadQuality="false"

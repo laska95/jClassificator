@@ -60,7 +60,7 @@ class FullApiController extends \yii\web\Controller {
             });
 
             $jql = Issue::getJQuery(['key__in' => $issue_keys]);
-            $issues = $provider->getIssueList($jql, ['description']);
+            $issues = $provider->getIssueList($jql, ['description'], 0, 100);
             if (isset($issues->getResponse()['issues'])) {
                 foreach ($issues->getResponse()['issues'] as $one) {
                     $issues_description[] = $one['fields']['description'];
@@ -70,7 +70,7 @@ class FullApiController extends \yii\web\Controller {
 
             //JQL
             $jql = $post['jql'];
-            $issues = $provider->getIssueList($jql, ['description']);
+            $issues = $provider->getIssueList($jql, ['description'], 0, 100);
             if (isset($issues->getResponse()['issues'])) {
                 foreach ($issues->getResponse()['issues'] as $one) {
                     $issues_description[] = $one['fields']['description'];
@@ -106,7 +106,7 @@ class FullApiController extends \yii\web\Controller {
             $issue_key_arr = array_filter($post['issue_key_arr']);
             if ($issue_key_arr) {
                 $jql = Issue::getJQuery(['key__in' => $issue_key_arr]);
-                $issues = $provider->getIssueList($jql, ['description']);
+                $issues = $provider->getIssueList($jql, ['description'], 0, 100);
                 if (isset($issues->getResponse()['issues'])) {
                     foreach ($issues->getResponse()['issues'] as $one) {
                         $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
@@ -118,7 +118,7 @@ class FullApiController extends \yii\web\Controller {
             //JQL
             if ($post['jql']) {
                 $jql = $post['jql'];
-                $issues = $provider->getIssueList($jql, ['description']);
+                $issues = $provider->getIssueList($jql, ['description'], 0, 100);
                 if (isset($issues->getResponse()['issues'])) {
                     foreach ($issues->getResponse()['issues'] as $one) {
                         $ret[$one['key']] = \app\modules\decision\helpers\Decision::textQuality(
@@ -135,6 +135,9 @@ class FullApiController extends \yii\web\Controller {
         if (\Yii::$app->request->isPost) {
             $post = \Yii::$app->request->post();
 
+            $lang = $post['lang_code'];
+            $prj = $post['project_code'];
+
             $issues = [];
             if (isset($post['issue_arr'])) {
                 foreach ($post['issue_arr'] as $key => $one) {
@@ -142,15 +145,35 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
             $provider = JiraProvider::getInstance();
-            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-            $jiraIssues = $provider->getIssueList($jql, ['description', 'summary']);
-            if (isset($jiraIssues->getResponse()['issues'])) {
-                foreach ($jiraIssues->getResponse()['issues'] as $one) {
-                    $issues[$one['key']] = [
-                        'key' => $one['key'],
-                        'summary' => $one['fields']['summary'],
-                        'description' => $one['fields']['description']
-                    ];
+
+            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[$one['key']] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description']
+                        ];
+                    }
+                }
+            }
+
+            //JQL
+            if ($post['jql']) {
+                $jql = $post['jql'];
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 500);
+                $providerRet = $jiraIssues->getResponse();
+                if (isset($providerRet['issues'])) {
+                    foreach ($providerRet['issues'] as $one) {
+                        $issues[$one['key']] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description']
+                        ];
+                    }
                 }
             }
 
@@ -165,33 +188,42 @@ class FullApiController extends \yii\web\Controller {
                         'id' => Decision::AD_GOOD,
                         'label' => Decision::getAD_Labels()[Decision::AD_GOOD]
                     ],
-                    'items' => []
+                    'items' => [],
+                    'datails' => []
                 ],
                 Decision::AD_EMPTY => [
                     'class' => [
                         'id' => Decision::AD_EMPTY,
                         'label' => Decision::getAD_Labels()[Decision::AD_EMPTY]
                     ],
-                    'items' => []
+                    'items' => [],
+                    'datails' => []
                 ],
                 Decision::AD_BAD => [
                     'class' => [
                         'id' => Decision::AD_BAD,
                         'label' => Decision::getAD_Labels()[Decision::AD_BAD]
                     ],
-                    'items' => []
+                    'items' => [],
+                    'datails' => []
                 ],
                 Decision::AD_ONLY_URL => [
                     'class' => [
                         'id' => Decision::AD_ONLY_URL,
                         'label' => Decision::getAD_Labels()[Decision::AD_ONLY_URL]
                     ],
-                    'items' => []
+                    'items' => [],
+                    'datails' => []
                 ]
             ];
 
             foreach ($ret as $issue_key => $val) {
                 $ret0[$val['value']]['items'][] = $issue_key;
+                $q = Decision::textQuality(
+                                $issues[$issue_key]['description'], $lang, $prj, $this->_user);
+                $ret0[$val['value']]['datails'][$issue_key] = [
+                    'quality' => $q
+                ];
             }
 
             return $ret0;
@@ -222,24 +254,27 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-            $jiraIssues = $provider->getIssueList($jql, ['duedate', 'timetracking', 'priority']);
-            if (isset($jiraIssues->getResponse()['issues'])) {
-                foreach ($jiraIssues->getResponse()['issues'] as $one) {
+            if (isset($post["issue_key_arr"])) {
+                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+                $jiraIssues = $provider->getIssueList($jql, ['duedate', 'timetracking', 'priority'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
 
-                    $duedate = $one['fields']['duedate'];
+                        $duedate = $one['fields']['duedate'];
 
-                    $one_arr = [
-                        'key' => $one['key'],
-                        'priority_id' => $one['fields']['priority']['id'],
-                        'duedate' => $duedate ? substr($duedate, 0, -8) : null,
-                        'remainingEstimateSeconds' => $one['fields']['timetracking']['remainingEstimateSeconds'] ?? null
-                    ];
+                        $one_arr = [
+                            'key' => $one['key'],
+                            'priority_id' => $one['fields']['priority']['id'],
+                            'duedate' => $duedate ? substr($duedate, 0, -8) : null,
+                            'remainingEstimateSeconds' => $one['fields']['timetracking']['remainingEstimateSeconds'] ?? null
+                        ];
 
-                    $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one_arr);
-                    $ret[$c]['items'][] = $one['key'];
+                        $c = \app\modules\decision\helpers\Decision::getPriorityClustering($one_arr);
+                        $ret[$c]['items'][] = $one['key'];
+                    }
                 }
             }
+
 
             return $ret;
         }
@@ -268,14 +303,30 @@ class FullApiController extends \yii\web\Controller {
             $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
             $provider = JiraProvider::getInstance();
 
-            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-            $jiraIssues = $provider->getIssueList($jql, ['description']);
-            if (isset($jiraIssues->getResponse()['issues'])) {
-                foreach ($jiraIssues->getResponse()['issues'] as $one) {
-                    $issues[] = [
-                        'key' => $one['key'],
-                        'description' => $one['fields']['description'],
-                    ];
+            $issue_key_arr = (isset($post["issue_key_arr"])) ? array_filter($post["issue_key_arr"]) : Null;
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $issue_key_arr]);
+                $jiraIssues = $provider->getIssueList($jql, ['description'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
+
+            if ($post['jql']) {
+                $jql = $post['jql'];
+                $jiraIssues = $provider->getIssueList($jql, ['description'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
                 }
             }
 
@@ -336,17 +387,35 @@ class FullApiController extends \yii\web\Controller {
             $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
             $provider = JiraProvider::getInstance();
 
-            $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-            $jiraIssues = $provider->getIssueList($jql, ['description', 'summary']);
-            if (isset($jiraIssues->getResponse()['issues'])) {
-                foreach ($jiraIssues->getResponse()['issues'] as $one) {
-                    $issues[] = [
-                        'key' => $one['key'],
-                        'summary' => $one['fields']['summary'],
-                        'description' => $one['fields']['description'],
-                    ];
+            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
                 }
             }
+            
+            if ($post['jql']) {
+                $jql = $post['jql'];
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 100);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
+
 
             $all_keys = [];
             $all_text = '';
