@@ -1,9 +1,11 @@
 <div ng-if="self.selectedDoneFilter == 'AD'">
+
     <issue-as-table 
         issue-key-list="self.resultAD[1].items" 
         active="self.activeIssueKey" 
         title="Добре описані задачі:" 
-        loadQuality="true">
+        loadQuality="true"
+        total="{{self.getTotalRet(self.resultAD)}}">
     </issue-as-table>
 
 
@@ -11,20 +13,24 @@
         issue-key-list="self.resultAD[2].items" 
         active="self.activeIssueKey" 
         title="Не описані задачі:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultAD)}}">
     </issue-as-table>
 
     <issue-as-table 
         issue-key-list="self.resultAD[3].items" 
         active="self.activeIssueKey" 
         title="Погано описані задачі:" 
-        loadQuality="true">
+        loadQuality="true"
+        total="{{self.getTotalRet(self.resultAD)}}">
     </issue-as-table>
 
     <issue-as-table 
         issue-key-list="self.resultAD[4].items" 
         active="self.activeIssueKey" 
-        title="Опис завдання складається тільки з посилань:" 
-        loadQuality="false">
+        title="Опис задачі містить тільки з посилання:" 
+        loadQuality="false"
+        totalRet="self.resultLC"
+        total="{{self.getTotalRet(self.resultAD)}}">
     </issue-as-table>
 </div>

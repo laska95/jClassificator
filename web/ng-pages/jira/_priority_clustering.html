@@ -1,10 +1,11 @@
 <div ng-if="self.selectedDoneFilter == 'PC'">
-    
+
     <issue-as-table 
         issue-key-list="self.resultPC[1].items" 
         active="self.activeIssueKey" 
         title="Найвищий пріоритет:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultPC)}}">
     </issue-as-table>
 
 
@@ -12,27 +13,31 @@
         issue-key-list="self.resultPC[2].items" 
         active="self.activeIssueKey" 
         title="Високий пріоритет:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultPC)}}">
     </issue-as-table>
 
     <issue-as-table 
         issue-key-list="self.resultPC[3].items" 
         active="self.activeIssueKey" 
         title="Нормальний пріоритет:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultPC)}}">
     </issue-as-table>
 
     <issue-as-table 
         issue-key-list="self.resultPC[4].items" 
         active="self.activeIssueKey" 
         title="Низький приоритет:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultPC)}}">
     </issue-as-table>
-    
+
     <issue-as-table 
         issue-key-list="self.resultPC[5].items" 
         active="self.activeIssueKey" 
         title="Дуже низький приоритет:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultPC)}}">
     </issue-as-table>
 </div>

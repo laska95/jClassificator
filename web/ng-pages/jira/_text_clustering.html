@@ -4,7 +4,8 @@
             issue-key-list="cluster" 
             active="self.activeIssueKey" 
             title="Кластер №{{ci}}" 
-            loadQuality="false">
+            loadQuality="false"
+            total="{{self.getTotalRet(self.resultTC)}}">
         </issue-as-table>
     </div>
 

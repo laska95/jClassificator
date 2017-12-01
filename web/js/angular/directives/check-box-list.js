@@ -26,7 +26,18 @@ agile.directive('checkboxList', function () {
             
             $scope.isChecked = function (item){
                 return ($scope.ngModel.indexOf(item[$scope.key]) >= 0);
-            }
+            };
+            
+            $scope.selectAll = function (){
+                $scope.ngModel = [];
+                angular.forEach($scope.items, function (item){
+                    $scope.ngModel.push(item[$scope.key]);
+                });
+            };
+            
+            $scope.deselectAll = function (){
+                $scope.ngModel = [];
+            };
         },
                 
     } 

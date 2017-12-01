@@ -1,10 +1,10 @@
 <div class="ls-self-table">    
     <div >
-        <h5>{{title}}</h5>
+        <span>{{title}}</span><span class="pull-right ls-pager">({{count}}/{{total}})</span>
     </div>
-        <div class="list-group ls-issuel-table">
-            <div ng-repeat="one_issue in issueKeyList" class="ls-issuel-table-row">
-                <a href="" ng-click="toggleActive(one_issue)" role="button">{{one_issue}}</a>
-            </div>
+    <div class="list-group ls-issuel-table">
+        <div ng-repeat="one_issue in issueKeyList" class="ls-issuel-table-row">
+            <a href="" ng-click="toggleActive(one_issue)" role="button">{{one_issue}}</a>
         </div>
+    </div>
 </div>

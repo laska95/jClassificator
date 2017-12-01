@@ -9,6 +9,7 @@ agile.directive('issueAsTable', function () {
             active: '=',
             'title': '@',
             'loadQuality': '=', //true/false
+            total: '@'
         },
 
         controller: function ($scope, $element, $attrs, $location, $timeout) {
@@ -25,6 +26,9 @@ agile.directive('issueAsTable', function () {
                     $scope.active = key;
                 }
             };
+              
+            $scope.count = (typeof $scope.issueKeyList === 'object') ?  $scope.issueKeyList.length : 0;
+
         },
 
     };

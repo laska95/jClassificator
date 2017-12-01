@@ -9,7 +9,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
 
     self.projectList = [];
     self.selectProject = undefined;
-
+    self.lang_code = 'project';
     self.issueStatusList = [];
     self.selectedIssueStatusList = [];
     
@@ -309,6 +309,14 @@ function JiraController($scope, $route, $http, $timeout, projectService,
                 $scope.$apply();
             });
         });
+    };
+    
+    self.getTotalRet = function (ret){
+        var total = 0;
+        angular.forEach(ret, function (one){
+           total += one.items.length; 
+        });
+        return total;
     };
 }
 

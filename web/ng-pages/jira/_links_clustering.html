@@ -4,15 +4,17 @@
         issue-key-list="self.resultLC[0].items" 
         active="self.activeIssueKey" 
         title="Без посилань:" 
-        loadQuality="false">
+        loadQuality="false"
+        total="{{self.getTotalRet(self.resultLC)}}">
     </issue-as-table>
 
-    <div ng-repeat="(ci, cluster) in self.resultLC" ng-if="ci!=0">
+    <div ng-repeat="(ci, cluster) in self.resultLC" ng-if="ci != 0">
         <issue-as-table 
             issue-key-list="cluster.items" 
             active="self.activeIssueKey" 
             title="{{cluster.url}}" 
-            loadQuality="false">
+            loadQuality="false"
+            total="{{self.getTotalRet(self.resultLC)}}">
         </issue-as-table>
     </div>
 

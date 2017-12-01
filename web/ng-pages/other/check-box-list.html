@@ -7,6 +7,9 @@
     </button>
     
     <ul class="dropdown-menu ls-list-group" aria-labelledby="dLabel">
+        <li><span ng-click="selectAll()">Вибрати всі</span> / 
+            <span ng-click="deselectAll()">Зняти виділення</span>
+        </li>
         <li ng-repeat="item in items"  ng-click="toggleVal(item)"class="dropdown-item">
             <span class="">{{ item[title]}} </span>
             <span class="pull-right glyphicon glyphicon-ok" ng-class="{'hide': !isChecked(item)}"></span>

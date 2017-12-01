@@ -29,9 +29,9 @@
     </div>
 
     <div id="home" class="tab-pane">
-        <div class="control-group form-inline">
+        <div class="control-group ">
             <p>Виберіть фільтр:</p>
-            <div class="">
+            <div class="form-inline">
                 <div class="form-group col-xs-6">
                     <dropdown-select ng-model="self.selectedFilter" key="key" title="label" items="self.filterList">  
                     </dropdown-select>
@@ -40,7 +40,15 @@
                     <button class="btn btn-primary" ng-click="self.applyFilter()">Застосувати</button>
                 </div>
             </div>
-
+            <div  class="form-group">
+                <ul class="list-inline">
+                    <li><label class="radio-inline"><input type="radio" name="lang" value="uk-UA" ng-model="self.lang_code">Українська</label></li>
+                    <li><label class="radio-inline"><input type="radio" name="lang" value="ru-RU" ng-model="self.lang_code">Російська</label></li>
+                    <li><label class="radio-inline"><input type="radio" name="lang" value="en-US" ng-model="self.lang_code">Англійська</label></li>
+                    <li><label class="radio-inline"><input type="radio" name="lang" value="project" ng-model="self.lang_code">Мова проекту</label>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div>
             <!-- Результат анілізу задач -->
