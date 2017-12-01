@@ -128,6 +128,13 @@ class JiraProvider {
         return $ret;
     }
     
+    public function getIssueTypeList(){
+        $ch = $this->getBaseCurl('/rest/api/2/issuetype');
+        $ret = new FullResponse($ch);
+        curl_close($ch);
+        return $ret;
+    }
+    
     /**
      * @return FullResponse 
      */

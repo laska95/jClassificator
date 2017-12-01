@@ -1,15 +1,15 @@
 
 <div class="dropdown self-dropdown">
     <!-- TO DO: доробити кнопки вибрати всі/зняти виділене-->
-    <button type="button" class="btn btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Вибрані типи задач
-        <span class="caret"></span>
+    <button type="button" class="btn btn-default ls-drop-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="pull-left">---</span>
+        <span class="caret ls-caret pull-right" ></span>
     </button>
     
-    <ul class="dropdown-menu" aria-labelledby="dLabel">
+    <ul class="dropdown-menu ls-list-group" aria-labelledby="dLabel">
         <li ng-repeat="item in items"  ng-click="toggleVal(item)"class="dropdown-item">
-            {{ item[title]}} 
-            <span class="glyphicon glyphicon-ok" ng-class="{'hide': !isChecked(item)}"></span>
+            <span class="">{{ item[title]}} </span>
+            <span class="pull-right glyphicon glyphicon-ok" ng-class="{'hide': !isChecked(item)}"></span>
         </li>
     </ul>
 

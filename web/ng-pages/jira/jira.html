@@ -1,23 +1,14 @@
 <div ng-controller="JiraController as self" class="row">
 
     <div class="col-md-3">
-        <div>
-            <!-- Список фільтрів -->
+        
 
-            <!-- Фільтр по проектах. Можна вибрати тільки один проект -->
-            <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">  
-            </dropdown-select>
-
-            <!-- Фільтр по статусах (мультиселект) -->
-            <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>
-
-            <!-- TO DO: фільтр по типу -->
-            <!-- TO DO: (мультиселект) задача  належить якомусь спринту, задача не належить якомусь спринту -->
-        </div>
-
-        <div class="row container ">
+        <div class="">
             <!-- Список задач, що відповідають фільтру -->
-            <div class="col-md-3">
+            <h4>Список задач:</h4>
+           
+            <pagination ng-model="self.responseGetIssues"></pagination>
+            <div class="form-group">
                 <ul class="list-group">
                     <li ng-repeat="oneIssue in self.issueList">
                     <issue-as-list issue="oneIssue" 
@@ -38,39 +29,6 @@
             <!-- Список фільтрів для кластеризації вибраних задач -->
             <div ng-include="'ng-pages/jira/_filters.html'" ></div>
         </div>
-        <div>
-            <!-- Результат анілізу задач -->
-            <div>
-                <div ng-include="'ng-pages/jira/_availability_description.html'">
-                </div>
-            </div>
-            <div>
-                <div ng-include="'ng-pages/jira/_priority_clustering.html'">
-                </div>
-            </div>
-            <div>
-                <div ng-include="'ng-pages/jira/_links_clustering.html'">
-                </div>
-            </div>
-            <div>
-                <div ng-include="'ng-pages/jira/_text_clustering.html'">
-                </div>
-            </div>
-            <div >
-                <olap-cube 
-                    xcode="self.selectedFilter1"
-                    ycode="self.selectedFilter2"
-                    apply="self.olapTriger"
-                    issues="self.olapParams">
-                    
-                </olap-cube>
-            </div>
-            
-        </div>
-
-
-
-
     </div>
 
     <!-- Детальна інформація по задачі -->

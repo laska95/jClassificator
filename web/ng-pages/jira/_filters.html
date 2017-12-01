@@ -1,48 +1,107 @@
 <ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Кластиризація</a></li>
+    <li class="active"><a data-toggle="tab" href="#menu0">Фільтр задач</a></li>
+    <li><a data-toggle="tab" href="#home">Кластиризація</a></li>
     <li><a data-toggle="tab" href="#menu1">OLAP-куб</a></li>
     <li><a data-toggle="tab" href="#menu2">Налаштування</a></li>
 </ul>
 
 <div class="tab-content">
-    <div id="home" class="tab-pane fade in active">
-        <div class="control-group form-inline">
-            <p>Виберіть фільтр:</p>
+    <div id="menu0" class="tab-pane fade in active">
+        <div class="">
+            <!-- Список фільтрів -->
+
             <div class="form-group">
-                
-                <dropdown-select ng-model="self.selectedFilter" key="key" title="label" items="self.filterList">  
+                <p>Проект:</p>
+                <dropdown-select ng-model="self.selectProject" key="key" title="name" items="self.projectList">  
                 </dropdown-select>
             </div>
-            <div class="form-group">
-                <button class="btn btn-primary" ng-click="self.applyFilter()">Застосувати</button>
-            </div>
-            
 
+            <div class="form-group">
+                <p>Тип задачі:</p>
+                <checkbox-list ng-model="self.selectedIssueTypeList" key="id" title="name" items="self.issueTypeList"></checkbox-list>
+            </div>
+
+            <div class="form-group">
+                <p>Статус задачі:</p>
+                <checkbox-list ng-model="self.selectedIssueStatusList" key="id" title="name" items="self.issueStatusList"></checkbox-list>
+            </div>
         </div>
     </div>
-    
+
+    <div id="home" class="tab-pane">
+        <div class="control-group form-inline">
+            <p>Виберіть фільтр:</p>
+            <div class="">
+                <div class="form-group col-xs-6">
+                    <dropdown-select ng-model="self.selectedFilter" key="key" title="label" items="self.filterList">  
+                    </dropdown-select>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" ng-click="self.applyFilter()">Застосувати</button>
+                </div>
+            </div>
+
+        </div>
+        <div>
+            <!-- Результат анілізу задач -->
+            <div>
+                <div ng-include="'ng-pages/jira/_availability_description.html'">
+                </div>
+            </div>
+            <div>
+                <div ng-include="'ng-pages/jira/_priority_clustering.html'">
+                </div>
+            </div>
+            <div>
+                <div ng-include="'ng-pages/jira/_links_clustering.html'">
+                </div>
+            </div>
+            <div>
+                <div ng-include="'ng-pages/jira/_text_clustering.html'">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="menu1" class="tab-pane fade">
-       <div class="control-group form-inline">
+        <div class="control-group form-inline">
             <p>Виберіть способи кластиризації:</p>
             <div class="form-group">
-                
+
                 <dropdown-select ng-model="self.selectedFilter1" key="key" title="label" items="self.filterList">  
                 </dropdown-select>
             </div>
             <div class="form-group">
-                
+
                 <dropdown-select ng-model="self.selectedFilter2" key="key" title="label" items="self.filterList">  
                 </dropdown-select>
             </div>
             <div class="form-group">
                 <button class="btn btn-primary" ng-click="self.applyFilter2()">Застосувати</button>
             </div>
-            
-
+        </div>
+        <div>
+            <!-- Результат анілізу задач -->
+            <olap-cube 
+                xcode="self.selectedFilter1"
+                ycode="self.selectedFilter2"
+                apply="self.olapTriger"
+                issues="self.olapParams">
+            </olap-cube> 
         </div>
     </div>
     <div id="menu2" class="tab-pane fade">
-        <h3>Menu 2</h3>
-        <p>Some content in menu 2.</p>
+        <div class="control-group">
+            <p>АРІ-ключ:</p>
+            <div class="row">
+                <div class="form-group col-xs-6">
+                    <input class="form-control " ng-model="self.user.apiKey">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-success">Створити новий</button>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>

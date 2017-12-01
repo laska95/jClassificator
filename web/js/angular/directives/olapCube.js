@@ -125,7 +125,7 @@ agile.directive('olapCube', function ($q) {
                     angular.forEach(data, function (data_one, key) {
                         var r_one = {
                             id: data_one.class.id,
-                            label: 'Джерело ' + key,
+                            label: data_one.class.label,
                             items: data_one.items
                         };
                         ret.push(r_one);

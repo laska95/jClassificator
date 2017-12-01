@@ -23,12 +23,12 @@ class FullApiController extends \yii\web\Controller{
         return parent::beforeAction($action);
     }
         
-    public function actionGetSelf(){     
-        $provider = JiraProvider::getInstance();
-        $res = $provider->getSelf();
-        $this->configureResponse($res);
-        return $res->response;
-    }
+//    public function actionGetSelf(){     
+//        $provider = JiraProvider::getInstance();
+//        $res = $provider->getSelf();
+//        $this->configureResponse($res);
+//        return $res->response;
+//    }
     
     public function actionGetProjectList(){
         
@@ -59,6 +59,24 @@ class FullApiController extends \yii\web\Controller{
         if ($val === false){
             $provider = JiraProvider::getInstance();
             $res = $provider->getIssueStatusList();
+            $this->configureResponse($res);
+            $val = $res->response;
+            $cache->set($res->response, 60*3);
+        }
+        
+        return $val;    
+    }
+    
+     public function actionGetIssueTypeList(){
+        
+        $user_id = \Yii::$app->user->id;
+        $cache = \Yii::$app->cache;
+        $cache_key = 'GetIssueList' .$user_id;
+        
+        $val = $cache->get($cache_key);
+        if ($val === false){
+            $provider = JiraProvider::getInstance();
+            $res = $provider->getIssueTypeList();
             $this->configureResponse($res);
             $val = $res->response;
             $cache->set($res->response, 60*3);
@@ -122,6 +140,11 @@ class FullApiController extends \yii\web\Controller{
         return $val;    
     }
 
+    public function actionGetSelf(){        
+        $user = \Yii::$app->user->identity;       
+        return \yii\helpers\ArrayHelper::toArray($user);    
+    }
+    
     /**
      * Налаштовує відповідь від сервера, залежно від відповіді Jira 
      */

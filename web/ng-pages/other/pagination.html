@@ -1,0 +1,13 @@
+
+<div class="form-group form-inline ls-pager">
+    <div class="form-group">
+        ({{from}}-{{to}}/{{total}})
+    </div>
+    <div class="form-group pull-right">
+        <span class="glyphicon glyphicon-arrow-left"></span>
+        <span ng-repeat="i in pageArr" ng-class="(i==currentPage)?'ls-select-page':''">{{i}}</span>
+        <span class="glyphicon glyphicon-arrow-right"></span>
+    </div>
+</div>
+
+    

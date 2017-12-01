@@ -1,18 +1,24 @@
 'use strict';
 
 function JiraController($scope, $route, $http, $timeout, projectService,
-        issueStatusService, issueService, jQueryLikeSerializeFixed) {
+        issueStatusService, issueService, jQueryLikeSerializeFixed, JiraUserService, issueTypeService) {
 
     var self = this;
+
+    self.user = {};
 
     self.projectList = [];
     self.selectProject = undefined;
 
     self.issueStatusList = [];
     self.selectedIssueStatusList = [];
+    
+    self.issueTypeList = [];
+    self.selectedIssueTypeList = [];
 
     self.issueList = [];
     self.selectedIssue = [];
+    self.responseGetIssues = {};
     self.activeIssueKey = undefined;
     self.activeIssue = undefined;
     self.ifActiveIssue = function () {
@@ -28,6 +34,13 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         var p = issueService.getByFilter(params);
         p.then(function (data) {
 
+        });
+    };
+
+    var getUser = function () {
+        var p = JiraUserService.get();
+        p.then(function (data) {
+            self.user = data.data;
         });
     };
 
@@ -59,6 +72,22 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
+    
+    var getIssueTypeList = function () {
+        var p = issueTypeService.getAll();
+        p.then(function (data) {
+            var arr = [];
+            self.selectedIssueTypeList = [];
+            angular.forEach(data.data, function (data_one) {
+                arr.push(data_one);
+                self.selectedIssueTypeList.push(data_one.id);
+            });
+            self.issueTypeList = arr;
+            $timeout(function () {
+                $scope.$apply();
+            });
+        });
+    };
 
     var getIssue = function (key) {
         var p = issueService.get(key);
@@ -73,6 +102,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
     var getIssueList = function (params) {
         var p = issueService.getByFilter(params);
         p.then(function (response) {
+            self.responseGetIssues = response.data;
             self.issueList = response.data.issues;
             $timeout(function () {
                 $scope.$apply();
@@ -84,12 +114,14 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         var filter_fnc = function (one_issue, one_key) {
             return (one_issue.key == key);
         };
-        var finds = self.issueList.issues(filter_fnc);
+        var finds = self.issueList.filter(filter_fnc);
         return finds[0]; //issue or undefined
     };
 
+    getUser();
     getProjectList();
     getIssueStatusList();
+    getIssueTypeList();
 
     $scope.$watch(function () {
         return JSON.stringify(self.selectedIssueStatusList) + self.selectProject;
@@ -157,7 +189,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         }
 
     };
-    
+
     self.olapTriger = true;
     self.olapParams = [];
     self.applyFilter2 = function () {
@@ -167,6 +199,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
         });
         self.olapParams = issue_keys;
         self.olapTriger = !self.olapTriger;
+        self.selectedDoneFilter = 'OLAP';
     };
 
     var adApply = function () {
@@ -195,7 +228,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
-    
+
     var pcApply = function () {
         var url = '/decision/full-api/priority-clustering';
 
@@ -222,7 +255,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
-    
+
     var lcApply = function () {
         var url = '/decision/full-api/links-clustering';
 
@@ -249,7 +282,7 @@ function JiraController($scope, $route, $http, $timeout, projectService,
             });
         });
     };
-    
+
     var tcApply = function () {
         var url = '/decision/full-api/text-clustering';
 

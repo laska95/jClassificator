@@ -20,6 +20,7 @@ use Codeception\Util\HttpCode;
 /** @property string $jiraAuthKey */
 /** @property string $jiraUrl */
 /** @property string $apiKey */
+/** @property string $settings */
 class User extends ActiveRecord implements \yii\web\IdentityInterface
 {
 
