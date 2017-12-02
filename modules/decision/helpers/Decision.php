@@ -180,25 +180,24 @@ class Decision {
         return ($d1 * 100) / $d0;
     }
 
-    
     /**
      * @param array $p масив з векторами, які треба кластеризувати
      * @return array масив з кластерами
      */
     public static function clustering($w) {
-ini_set('memory_limit', '1200M');
+        ini_set('memory_limit', '1200M');
         $full_graph = self::fullGraph($w);
-        $tree = self::tree_prime($full_graph, $w);       
-        
+        $tree = self::tree_prime($full_graph, $w);
+
         $clusters = self::getClusters($tree);
-      
+
         $ww = self::fullGraph($w);
         $F0 = self::getTestF($w);
-                
-        for ($i = 0; $i < count($ww)/2; $i++) {
+
+        for ($i = 0; $i < count($ww) / 2; $i++) {
             $is_ok = true;
             foreach ($clusters as $one) {
-                
+
                 $F = self::getF($one, $w, $ww, $tree);
                 if ($F < $F0) {
                     $is_ok = FALSE;
@@ -244,26 +243,26 @@ ini_set('memory_limit', '1200M');
 
     private static function getClusters($tree) {
         $clusters = [];
-        
+
         foreach ($tree as $key1 => $w1) {
             //масив зв'язаних вершин
             $key_group = [$key1];
-            
+
             foreach ($w1 as $key2 => $v) {
                 if ($v > 0) {
                     $key_group[] = $key2;
                 }
             }
-            
+
             $ci = [];
             foreach ($key_group as $one_key) {
                 $gi_arr = self::getClusterIndexs($clusters, $one_key);
-                foreach ($gi_arr as $one_g){
+                foreach ($gi_arr as $one_g) {
                     $ci[] = $one_g;
                 }
             }
-            
-            if (empty($ci)){
+
+            if (empty($ci)) {
                 $clusters[] = $key_group;
             } elseif (count($ci) == 1) {
                 //one old cluster
@@ -271,26 +270,24 @@ ini_set('memory_limit', '1200M');
                 $clusters[$ci] = array_unique(array_merge($clusters[$ci], $key_group));
             } else {
                 $marge_cluster = $key_group;
-                foreach ($ci as  $c){
-                    foreach ($clusters[$c] as $one_val){
+                foreach ($ci as $c) {
+                    foreach ($clusters[$c] as $one_val) {
                         $marge_cluster[] = $one_val;
                     }
                 }
-                
-                foreach ($ci as  $c){
+
+                foreach ($ci as $c) {
                     unset($clusters[$c]);
                 }
-                
+
                 $clusters[] = array_unique($marge_cluster);
             }
-            
-            
         }
-        
+
         foreach ($clusters as $ci => $one) {
             $clusters[$ci] = array_unique($one);
         }
-        
+
         return $clusters;
     }
 
@@ -441,41 +438,94 @@ ini_set('memory_limit', '1200M');
         return min($all);
     }
 
-    public static function getKeyWords($issues){
+    public static function getKeyWords($issues) {
         $issue_keys = [];
         $text_keys = [];
-        
+
         $all_text = '';
-        
-        foreach ($issues as $one_issue){
+
+        foreach ($issues as $one_issue) {
             //ключові слова із заголовка
             $title = $one_issue['summary'];
             $title = preg_replace('#\W#u', ' ', $title);
             $title = preg_replace('#( {2,})#u', ' ', $title);
-            
+
             $title_keys = \app\modules\decision\models\FrequencyLang::canculateFrequency($title, 5);
-            
-            foreach ($title_keys as $key => $f){
+
+            foreach ($title_keys as $key => $f) {
                 $issue_keys[] = $key;
             }
-            
+
             //ключові слова із тексту
             $text = $one_issue['description'];
             $text = preg_replace('#\W#u', ' ', $text);
             $text = preg_replace('#( {2,})#u', ' ', $text);
-            
+
             $f5_text = \app\modules\decision\models\FrequencyLang::canculateFrequency($text, 5);
             $text_keys = [];
-            foreach ($f5_text as $key => $f_one){
-                 $issue_keys[] = $key;
+            foreach ($f5_text as $key => $f_one) {
+                $issue_keys[] = $key;
             }
-            
         }
-        
+
         $issue_keys = array_unique($issue_keys);
         return $issue_keys;
 //        var_dump($issue_keys);
 //        die();
     }
-    
+
+    public static function findLike($like_issue, $issues) {
+        $delta = [];
+
+        $text0 = $like_issue['description'];
+        $text0 = preg_replace('#\W#u', ' ', $text0);
+        $text0 = preg_replace('#( {2,})#u', ' ', $text0);
+
+        foreach ($issues as $one_issue) {
+
+//            if ($one_issue['key'] !== 'PR-5'){
+//                continue;
+//            }
+
+            $text = $one_issue['description'];
+            $text = preg_replace('#\W#u', ' ', $text);
+            $text = preg_replace('#( {2,})#u', ' ', $text);
+
+            $delta[$one_issue['key']] = self::getTextDif($text0, $text);
+        }
+
+//        die;
+        return $delta;
+    }
+
+    public static function getTextDif($text1, $text2) {
+
+        $ff = ['text1' => [], 'text2' => []];
+        $ff0 = [];
+
+        foreach ([5] as $n) {
+            $ff['text1'][$n] = FrequencyLang::canculateFrequency($text1, $n);
+            $ff['text2'][$n] = FrequencyLang::canculateFrequency($text2, $n);
+            $ff0[$n]= FrequencyLang::canculateFrequency($text1.' '.$text2, $n);
+        }
+
+        //to norm
+        $v = [];
+        $v1 = [];
+        foreach ([5] as $n) {
+
+            $d0 = self::qDif($ff['text1'][$n], []);
+            $d = self::qDif($ff['text1'][$n], $ff['text2'][$n]);
+
+            $v0 = 100 - self::normDef($d0, $d);
+            $v[$n] = ($v0 > 0) ? $v0 * $n : 0;
+            $v1[$n] = ($v0 > 0) ? $v0  : 0;
+        }
+//        var_dump('-----------------');
+        
+        $ret = self::qDif($v, []);
+        $ret1 = self::qDif($v1, []);
+        return $ret;
+    }
+
 }
