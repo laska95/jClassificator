@@ -378,7 +378,7 @@ class FullApiController extends \yii\web\Controller {
         }
     }
 
-    public function actionTextClustering() {
+    public function actionLikeClustering() {
 
         if (\Yii::$app->request->isPost) {
 
@@ -435,7 +435,7 @@ class FullApiController extends \yii\web\Controller {
                 $ci = [];
                 foreach ($key_group as $one_key) {
                     $ci_new = Decision::getClusterIndexs($clusters, $one_key);
-                    foreach ($ci_new as $cin){
+                    foreach ($ci_new as $cin) {
                         $ci[] = $cin;
                     }
                 }
@@ -444,20 +444,11 @@ class FullApiController extends \yii\web\Controller {
                     $clusters[] = $key_group;
                 } elseif (count($ci) == 1) {
                     //one old cluster
-                    try {
-                        foreach ($key_group as $ok) {
-                            $clusters[$ci[0]][] = $ok;
-                        }
-                        $clusters[$ci[0]] = array_unique($clusters[$ci[0]]);
-                    } catch (\Exception $ex) {
-                        var_dump($ex->getMessage());
-                        var_dump($ci);
-                        var_dump($clusters);
-                        var_dump($key_group);
-                        die;
+                    foreach ($key_group as $ok) {
+                        $clusters[$ci[0]][] = $ok;
                     }
+                    $clusters[$ci[0]] = array_unique($clusters[$ci[0]]);
                 } else {
-                    $clusters[] = $key_group;
                     $marge_cluster = $key_group;
                     foreach ($ci as $c) {
                         foreach ($clusters[$c] as $one_val) {
@@ -489,7 +480,7 @@ class FullApiController extends \yii\web\Controller {
         }
     }
 
-    public function actionTextClustering2() {
+    public function actionTextClustering() {
 
         if (\Yii::$app->request->isPost) {
 
@@ -513,7 +504,7 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            if (isset($post['jql'])) {
+            if (isset($post['jql']) && !empty($post['jql'])) {
                 $jql = $post['jql'];
                 $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
                 if (isset($jiraIssues->getResponse()['issues'])) {
@@ -527,121 +518,7 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            //clean issues
-            $clean_issues_text = [];
-            $text_mm = [];
-            foreach ($issues as $one) {
-                $text0 = ($one['description'] ?? '') . ' ' . ($one['summary'] ?? '') . ' ' . ($one['summary'] ?? '');
-                $text0 = preg_replace('#\W#u', ' ', $text0);
-                $text0 = preg_replace('#( {2,})#u', ' ', $text0);
-                $clean_issues_text[$one['key']] = $text0;
-            }
-
-            foreach ($clean_issues_text as $key1 => $text1) {
-                $text_mm[$key1] = [];
-                foreach ($clean_issues_text as $key2 => $text2) {
-                    $text_mm[$key1][$key2] = Decision::dif2FText($text1, $text2);
-                }
-            }
-
-
-
-            $vv_min = [];
-            $vv_max = [];
-            foreach ($text_mm as $key => $v) {
-                foreach ($v as $i => $one_v) {
-                    //min
-                    if (!isset($vv_min[$i])) {
-                        $vv_min[$i] = ($one_v < 0) ? $one_v : 0;
-                    } elseif ($vv_min[$i] > $one_v) {
-                        $vv_min[$i] = $one_v;
-                    }
-                }
-            }
-
-            foreach ($text_mm as $key => $v) {
-                foreach ($v as $i => $v_one) {
-                    $text_mm[$key][$i] -= $vv_min[$i];
-                }
-            }
-
-            //to [0:100]
-            $vv_max = [];
-            foreach ($text_mm as $key => $v) {
-                foreach ($v as $i => $one_v) {
-                    //min
-                    if (!isset($vv_max[$i])) {
-                        $vv_max[$i] = $one_v;
-                    } elseif ($vv_max[$i] < $one_v) {
-                        $vv_max[$i] = $one_v;
-                    }
-                }
-            }
-//нормалізація координат
-            foreach ($text_mm as $key => $v) {
-                foreach ($v as $i => $v_one) {
-                    $text_mm[$key][$i] = 100 * $text_mm[$key][$i] / $vv_max[$i];
-                }
-            }
-
-//            return $text_mm;
-            //видалення не значущих координат
-
-            $r0 = Decision::clustering2($text_mm);
-            $ret = [];
-
-            foreach ($r0 as $i => $r_one) {
-                $ret[] = [
-                    'class' => [
-                        'id' => $i
-                    ],
-                    'items' => $r_one
-                ];
-            }
-
-            return $ret;
-        }
-    }
-
-    public function actionTextClusteringOld() {
-
-        if (\Yii::$app->request->isPost) {
-
-            $post = \Yii::$app->request->post();
-
-            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
-            $provider = JiraProvider::getInstance();
-
-            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
-            if ($issue_key_arr) {
-                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
-                if (isset($jiraIssues->getResponse()['issues'])) {
-                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
-                        $issues[] = [
-                            'key' => $one['key'],
-                            'summary' => $one['fields']['summary'],
-                            'description' => $one['fields']['description'],
-                        ];
-                    }
-                }
-            }
-
-            if (isset($post['jql'])) {
-                $jql = $post['jql'];
-                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
-                if (isset($jiraIssues->getResponse()['issues'])) {
-                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
-                        $issues[] = [
-                            'key' => $one['key'],
-                            'summary' => $one['fields']['summary'],
-                            'description' => $one['fields']['description'],
-                        ];
-                    }
-                }
-            }
-
-
+            
             $all_keys = [];
             $all_text = '';
 
@@ -661,45 +538,59 @@ class FullApiController extends \yii\web\Controller {
                 $all_text .= ' ' . $title . ' ' . $text;
                 $clean_issues[$one['key']] = $title . ' ' . $title . ' ' . $title . ' ' . $text;
             }
-
+            
             foreach ($clean_issues as $issue_key => $issue_text) {
                 $w[$issue_key] = [];
                 foreach ($all_keys as $key_kode) {
-                    $n = preg_match_all("#{$key_kode}#", $issue_text);
+                    $n = preg_match_all("#{$key_kode}#", $issue_text) + 1;
                     $w[$issue_key][$key_kode] = $n;
                 }
             }
 
+            //перерахунок частоти            
+            foreach ($w as $key => $vf){
+                $sum = array_sum($vf);
+                foreach ($vf as $fi => $one_f){
+                    $w[$key][$fi] = $one_f/$sum;
+                }
+            }
+            
+            
             $d_max = [];
+            $d_min = [];
             $d_sum = [];
             $d_dif = [];
             foreach ($w as $issue_key => $old_w) {
-                foreach ($old_w as $i => $n) {
+                foreach ($old_w as $i => $f) {
 
                     if (!isset($d_max[$i])) {
-                        $d_max[$i] = $n;
-                        $d_sum[$i] = $n;
+                         $d_max[$i] = $f;
                     } else {
-                        if ($d_max[$i] < $n) {
-                            $d_max[$i] = $n;
-                        }
-                        $d_max[$i] += $n;
+                        $d_max[$i] = ($d_max[$i] < $f) ? $f : $d_max[$i];
                     }
+                    
+                    if (!isset($d_min[$i])) {
+                         $d_min[$i] = $f;
+                    } else {
+                        $d_min[$i] = ($d_min[$i] > $f) ? $f : $d_min[$i];
+                    }
+                    
                 }
             }
 
-            foreach ($d_max as $i => $val) {
-                $d_dif[$i] = $val - $d_sum[$i] / count($w);
+            foreach ($d_max as $i => $max_v) {
+                $d_dif[$i] = $d_max[$i] - $d_min[$i];
             }
-
-            //нормалізація координат
-            foreach ($w as $issue_key => $old_w) {
-                foreach ($old_w as $i => $n) {
-                    $w[$issue_key][$i] = ($d_max[$i]) ? ($n * 100 / $d_max[$i]) : 0;
-                }
-            }
-
-            //видалення не значущих координат
+            
+//
+//            //нормалізація координат
+//            foreach ($w as $issue_key => $old_w) {
+//                foreach ($old_w as $i => $n) {
+//                    $w[$issue_key][$i] = ($d_max[$i]) ? ($n * 100 / $d_max[$i]) : 0;
+//                }
+//            }
+//
+//            //видалення не значущих координат
             $d_dif_max = max($d_dif);
             foreach ($d_max as $i => $v) {
                 if ($v < 0.32 * $d_dif_max || $v > 0.68 * $d_dif_max) {
