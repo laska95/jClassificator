@@ -291,7 +291,7 @@ class Decision {
         return $clusters;
     }
 
-    private static function getClusterIndexs($clusters, $key) {
+    public static function getClusterIndexs($clusters, $key) {
         $i = [];
         foreach ($clusters as $ci => $one) {
             if (in_array($key, $one)) {

@@ -416,6 +416,117 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
+            $ret0 = [];
+
+            foreach ($issues as $one) {
+                $ret0[$one['key']] = Decision::findLike($one, $issues);
+                ;
+            }
+
+            $clusters = [];
+            foreach ($ret0 as $key => $like_elem) {
+                $key_group = [];
+                foreach ($like_elem as $like_key => $like_v) {
+                    if ($like_v > 0) {
+                        $key_group[] = $like_key;
+                    }
+                }
+
+                $ci = [];
+                foreach ($key_group as $one_key) {
+                    $ci_new = Decision::getClusterIndexs($clusters, $one_key);
+                    foreach ($ci_new as $cin){
+                        $ci[] = $cin;
+                    }
+                }
+
+                if (empty($ci)) {
+                    $clusters[] = $key_group;
+                } elseif (count($ci) == 1) {
+                    //one old cluster
+                    try {
+                        foreach ($key_group as $ok) {
+                            $clusters[$ci[0]][] = $ok;
+                        }
+                        $clusters[$ci[0]] = array_unique($clusters[$ci[0]]);
+                    } catch (\Exception $ex) {
+                        var_dump($ex->getMessage());
+                        var_dump($ci);
+                        var_dump($clusters);
+                        var_dump($key_group);
+                        die;
+                    }
+                } else {
+                    $clusters[] = $key_group;
+                    $marge_cluster = $key_group;
+                    foreach ($ci as $c) {
+                        foreach ($clusters[$c] as $one_val) {
+                            $marge_cluster[] = $one_val;
+                        }
+                    }
+
+                    foreach ($ci as $c) {
+                        unset($clusters[$c]);
+                    }
+
+                    $clusters[] = array_unique($marge_cluster);
+                }
+            }
+
+
+            $ret = [];
+
+            foreach ($clusters as $i => $r_one) {
+                $ret[] = [
+                    'class' => [
+                        'id' => $i
+                    ],
+                    'items' => $r_one
+                ];
+            }
+
+            return $ret;
+        }
+    }
+
+    public function actionTextClustering2() {
+
+        if (\Yii::$app->request->isPost) {
+
+            $post = \Yii::$app->request->post();
+
+            $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
+            $provider = JiraProvider::getInstance();
+
+            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
+
+            if (isset($post['jql'])) {
+                $jql = $post['jql'];
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
+
             //clean issues
             $clean_issues_text = [];
             $text_mm = [];
@@ -433,7 +544,7 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            
+
 
             $vv_min = [];
             $vv_max = [];
@@ -445,7 +556,6 @@ class FullApiController extends \yii\web\Controller {
                     } elseif ($vv_min[$i] > $one_v) {
                         $vv_min[$i] = $one_v;
                     }
-                    
                 }
             }
 
@@ -465,21 +575,18 @@ class FullApiController extends \yii\web\Controller {
                     } elseif ($vv_max[$i] < $one_v) {
                         $vv_max[$i] = $one_v;
                     }
-                    
                 }
             }
 //нормалізація координат
             foreach ($text_mm as $key => $v) {
                 foreach ($v as $i => $v_one) {
-                    $text_mm[$key][$i] = 100 * $text_mm[$key][$i]/$vv_max[$i];
+                    $text_mm[$key][$i] = 100 * $text_mm[$key][$i] / $vv_max[$i];
                 }
             }
-            
-//            return $text_mm;
-            
 
+//            return $text_mm;
             //видалення не значущих координат
-            
+
             $r0 = Decision::clustering2($text_mm);
             $ret = [];
 
