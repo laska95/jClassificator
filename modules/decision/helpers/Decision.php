@@ -477,17 +477,14 @@ class Decision {
     public static function findLike($like_issue, $issues) {
         $delta = [];
 
-        $text0 = $like_issue['description'];
+        $text0 = ($like_issue['description'] ?? '') . ' ' . ($like_issue['summary'] ?? '') . ' ' .($like_issue['summary'] ?? '');
         $text0 = preg_replace('#\W#u', ' ', $text0);
         $text0 = preg_replace('#( {2,})#u', ' ', $text0);
 
         foreach ($issues as $one_issue) {
 
-//            if ($one_issue['key'] !== 'PR-5'){
-//                continue;
-//            }
 
-            $text = $one_issue['description'];
+            $text = ($one_issue['description'] ?? '') . ' ' . ($one_issue['summary'] ?? '') . ' ' .($one_issue['summary'] ?? '');
             $text = preg_replace('#\W#u', ' ', $text);
             $text = preg_replace('#( {2,})#u', ' ', $text);
 
@@ -506,7 +503,7 @@ class Decision {
         foreach ([5] as $n) {
             $ff['text1'][$n] = FrequencyLang::canculateFrequency($text1, $n);
             $ff['text2'][$n] = FrequencyLang::canculateFrequency($text2, $n);
-            $ff0[$n]= FrequencyLang::canculateFrequency($text1.' '.$text2, $n);
+            $ff0[$n] = FrequencyLang::canculateFrequency($text1 . ' ' . $text2, $n);
         }
 
         //to norm
@@ -519,10 +516,10 @@ class Decision {
 
             $v0 = 100 - self::normDef($d0, $d);
             $v[$n] = ($v0 > 0) ? $v0 * $n : 0;
-            $v1[$n] = ($v0 > 0) ? $v0  : 0;
+            $v1[$n] = ($v0 > 0) ? $v0 : 0;
         }
 //        var_dump('-----------------');
-        
+
         $ret = self::qDif($v, []);
         $ret1 = self::qDif($v1, []);
         return $ret;

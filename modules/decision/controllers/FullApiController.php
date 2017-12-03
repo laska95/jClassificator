@@ -508,41 +508,53 @@ class FullApiController extends \yii\web\Controller {
             $post = \Yii::$app->request->post();
 
             $issues = isset($post['issue_arr']) ? $post['issue_arr'] : [];
-//            $provider = JiraProvider::getInstance();
+            $provider = JiraProvider::getInstance();
 
-//            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
-//            if ($issue_key_arr) {
-//                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
-//                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
-//                if (isset($jiraIssues->getResponse()['issues'])) {
-//                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
-//                        $issues[] = [
-//                            'key' => $one['key'],
-//                            'summary' => $one['fields']['summary'],
-//                            'description' => $one['fields']['description'],
-//                        ];
-//                    }
-//                }
-//            }
+            $issue_key_arr = (isset($post['issue_key_arr'])) ? array_filter($post['issue_key_arr']) : NULL;
+            if ($issue_key_arr) {
+                $jql = Issue::getJQuery(['key__in' => $post["issue_key_arr"]]);
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
 
-//            if (isset($post['jql'])) {
-//                $jql = $post['jql'];
-//                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
-//                if (isset($jiraIssues->getResponse()['issues'])) {
-//                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
-//                        $issues[] = [
-//                            'key' => $one['key'],
-//                            'summary' => $one['fields']['summary'],
-//                            'description' => $one['fields']['description'],
-//                        ];
-//                    }
-//                }
-//            }
+            if (isset($post['jql'])) {
+                $jql = $post['jql'];
+                $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
+                if (isset($jiraIssues->getResponse()['issues'])) {
+                    foreach ($jiraIssues->getResponse()['issues'] as $one) {
+                        $issues[] = [
+                            'key' => $one['key'],
+                            'summary' => $one['fields']['summary'],
+                            'description' => $one['fields']['description'],
+                        ];
+                    }
+                }
+            }
 
 //$issues - масив з подібними задачами
             
-            $like_issue = $post['issue_like'];
+            
+            if (isset($post['issue_like']['key'])){
+                $jis = $provider->getIssue($post['issue_like']['key'], 'description, summary')->getResponse();
+                $like_issue = [
+                    'key' => $jis['key'],
+                    'description' => $jis['fields']['description'],
+                    'summary' => $jis['fields']['summary'],
+                ];
+            } else {
+                $like_issue = $post['issue_like'];
+                
+            }
             $ret = Decision::findLike($like_issue, $issues);
+            
             return $ret;
         }
     }
