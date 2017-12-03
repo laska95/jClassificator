@@ -332,37 +332,51 @@ class Decision {
      * @param array $ww - fullGraph
      * @return array просте дерево
      */
-    private static function tree_prime($ww, $w) {
+    private static function tree_prime($ww, $w = NULL) {
+
+        if ($w === NULL) {
+            $w = $ww[array_keys($ww)[0]];
+        }
+        
         $ww_tree = self::fullGraph($w, 0);
         $no_in_tree = array_keys($w);
         $in_tree = [$no_in_tree[0]];
         unset($no_in_tree[0]);
         $i = 0;
-        while (count($no_in_tree) > 0) {
-            $ww0 = self::fullGraph($w, 0);
-            foreach ($in_tree as $key_in_tree) {
-                foreach ($no_in_tree as $key_no_in_tree) {
-                    $ww0[$key_in_tree][$key_no_in_tree] = $ww[$key_in_tree][$key_no_in_tree];
-                }
-            }
 
-            $w_min = self::min2($ww0);
-            foreach ($in_tree as $key_in_tree) {
-                foreach ($no_in_tree as $key_no_in_tree) {
-                    if ($ww0[$key_in_tree][$key_no_in_tree] == $w_min) {
-                        $in_tree[] = $key_no_in_tree;
-                        unset($no_in_tree[array_search($key_no_in_tree, $no_in_tree)]);
-                        $ww_tree[$key_in_tree][$key_no_in_tree] = $w_min;
-                        $ww_tree[$key_no_in_tree][$key_in_tree] = $w_min;
-                        break (2);
+        try {
+
+            while (count($no_in_tree) > 0) {
+                $ww0 = self::fullGraph($w, 0);
+                foreach ($in_tree as $key_in_tree) {
+                    foreach ($no_in_tree as $key_no_in_tree) {
+                        $ww0[$key_in_tree][$key_no_in_tree] = $ww[$key_in_tree][$key_no_in_tree];
                     }
                 }
-            }
 
-            if ($i > 100) {
-                break;
+                $w_min = self::min2($ww0);
+                foreach ($in_tree as $key_in_tree) {
+                    foreach ($no_in_tree as $key_no_in_tree) {
+                        if ($ww0[$key_in_tree][$key_no_in_tree] == $w_min) {
+                            $in_tree[] = $key_no_in_tree;
+                            unset($no_in_tree[array_search($key_no_in_tree, $no_in_tree)]);
+                            $ww_tree[$key_in_tree][$key_no_in_tree] = $w_min;
+                            $ww_tree[$key_no_in_tree][$key_in_tree] = $w_min;
+                            break (2);
+                        }
+                    }
+                }
+
+                if ($i > 100) {
+                    break;
+                }
             }
+        } catch (\Exception $e) {
+            var_dump($in_tree);
+            var_dump($no_in_tree);
+            die();
         }
+
         return $ww_tree;
     }
 
@@ -477,14 +491,14 @@ class Decision {
     public static function findLike($like_issue, $issues) {
         $delta = [];
 
-        $text0 = ($like_issue['description'] ?? '') . ' ' . ($like_issue['summary'] ?? '') . ' ' .($like_issue['summary'] ?? '');
+        $text0 = ($like_issue['description'] ?? '') . ' ' . ($like_issue['summary'] ?? '') . ' ' . ($like_issue['summary'] ?? '');
         $text0 = preg_replace('#\W#u', ' ', $text0);
         $text0 = preg_replace('#( {2,})#u', ' ', $text0);
 
         foreach ($issues as $one_issue) {
 
 
-            $text = ($one_issue['description'] ?? '') . ' ' . ($one_issue['summary'] ?? '') . ' ' .($one_issue['summary'] ?? '');
+            $text = ($one_issue['description'] ?? '') . ' ' . ($one_issue['summary'] ?? '') . ' ' . ($one_issue['summary'] ?? '');
             $text = preg_replace('#\W#u', ' ', $text);
             $text = preg_replace('#( {2,})#u', ' ', $text);
 
@@ -500,7 +514,7 @@ class Decision {
         $ff = ['text1' => [], 'text2' => []];
         $ff0 = [];
 
-        foreach ([5] as $n) {
+        foreach ([3, 5] as $n) {
             $ff['text1'][$n] = FrequencyLang::canculateFrequency($text1, $n);
             $ff['text2'][$n] = FrequencyLang::canculateFrequency($text2, $n);
             $ff0[$n] = FrequencyLang::canculateFrequency($text1 . ' ' . $text2, $n);
@@ -509,7 +523,7 @@ class Decision {
         //to norm
         $v = [];
         $v1 = [];
-        foreach ([5] as $n) {
+        foreach ([3, 5] as $n) {
 
             $d0 = self::qDif($ff['text1'][$n], []);
             $d = self::qDif($ff['text1'][$n], $ff['text2'][$n]);
@@ -523,6 +537,77 @@ class Decision {
         $ret = self::qDif($v, []);
         $ret1 = self::qDif($v1, []);
         return $ret;
+    }
+
+    public static function getTextFVector($text) {
+        $ff = [];
+
+        foreach ([3, 5] as $n) {
+            $ff[$n] = FrequencyLang::canculateFrequency($text, $n);
+        }
+
+        return $ff;
+    }
+
+    public static function dif2FText($text1, $text2) {
+        $ff = ['text1' => [], 'text2' => []];
+        $ff0 = [];
+
+        foreach ([3, 5] as $n) {
+            $ff['text1'][$n] = FrequencyLang::canculateFrequency($text1, $n);
+            $ff['text2'][$n] = FrequencyLang::canculateFrequency($text2, $n);
+            $ff0[$n] = FrequencyLang::canculateFrequency($text1 . ' ' . $text2, $n);
+        }
+
+        //to norm
+        $v = [];
+        $v1 = [];
+
+        foreach ([3, 5] as $n) {
+
+            $d0 = self::qDif($ff0[$n], []);
+            $d = self::qDif($ff['text1'][$n], $ff['text2'][$n]);
+
+            $v[$n] = 100 - self::normDef($d0, $d);
+        }
+
+        return $v[$n];
+    }
+
+    public static function clustering2($ww) {
+        ini_set('memory_limit', '1200M');
+        $full_graph = $ww;
+        $w = $full_graph[array_keys($full_graph)[0]];
+        
+        $tree = self::tree_prime($full_graph, $w);
+
+//        return $tree;
+
+        $clusters = self::getClusters($tree);
+
+        $ww = json_decode(json_encode($full_graph), true);
+        $F0 = self::getTestF($w);
+
+        
+        for ($i = 0; $i < count($ww) / 2; $i++) {
+            $is_ok = true;
+            foreach ($clusters as $one) {
+
+                $F = self::getF($one, $w, $ww, $tree);
+                if ($F < $F0) {
+                    $is_ok = FALSE;
+                }
+            }
+
+            if (!$is_ok) {
+                $tree = self::divTree($tree, $one, $F0, $w, $ww);
+                $clusters = self::getClusters($tree);
+            } else {
+                break;
+            }
+        }
+
+        return $clusters;
     }
 
 }
