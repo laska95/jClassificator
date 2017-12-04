@@ -640,7 +640,7 @@ class FullApiController extends \yii\web\Controller {
                 }
             }
 
-            if (isset($post['jql'])) {
+            if (isset($post['jql']) && !empty($post['jql'])) {
                 $jql = $post['jql'];
                 $jiraIssues = $provider->getIssueList($jql, ['description', 'summary'], 0, 20);
                 if (isset($jiraIssues->getResponse()['issues'])) {
@@ -657,7 +657,7 @@ class FullApiController extends \yii\web\Controller {
 //$issues - масив з подібними задачами
 
 
-            if (isset($post['issue_like']['key'])) {
+            if (isset($post['issue_like']['key']) && !empty($post['issue_like']['key'])) {
                 $jis = $provider->getIssue($post['issue_like']['key'], 'description, summary')->getResponse();
                 $like_issue = [
                     'key' => $jis['key'],

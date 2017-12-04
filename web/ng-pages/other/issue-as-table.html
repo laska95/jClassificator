@@ -5,6 +5,10 @@
     <div class="list-group ls-issuel-table">
         <div ng-repeat="one_issue in issueKeyList" class="ls-issuel-table-row">
             <a href="" ng-click="toggleActive(one_issue)" role="button">{{one_issue}}</a>
+
+            <span ng-if="hasQuality(one_issue)" class="pull-right badge">
+                {{getQuality(one_issue) | number:2}}
+            </span>
         </div>
     </div>
 </div>

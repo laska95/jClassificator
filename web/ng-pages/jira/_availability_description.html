@@ -1,6 +1,7 @@
 <div ng-if="self.selectedDoneFilter == 'AD'">
 
     <issue-as-table 
+        details="self.resultAD[1].datails"
         issue-key-list="self.resultAD[1].items" 
         active="self.activeIssueKey" 
         title="Добре описані задачі:" 
@@ -10,6 +11,7 @@
 
 
     <issue-as-table 
+        details="self.resultAD[2].datails"
         issue-key-list="self.resultAD[2].items" 
         active="self.activeIssueKey" 
         title="Не описані задачі:" 
@@ -18,6 +20,7 @@
     </issue-as-table>
 
     <issue-as-table 
+        details="self.resultAD[3].datails"
         issue-key-list="self.resultAD[3].items" 
         active="self.activeIssueKey" 
         title="Погано описані задачі:" 
@@ -26,6 +29,7 @@
     </issue-as-table>
 
     <issue-as-table 
+        details="self.resultAD[4].datails"
         issue-key-list="self.resultAD[4].items" 
         active="self.activeIssueKey" 
         title="Опис задачі містить тільки з посилання:" 
